@@ -1,0 +1,84 @@
+#include <gsl/gsl_errno.h>
+#include <gsl/gsl_matrix.h>
+#include <gsl/gsl_odeiv2.h>
+#include <math.h>
+#include "feynman.h"
+//#include "params.h"
+#include "molecules.h"
+#include "lasers.h"
+
+#define mu 1581.51 // this is 0.05 debye / hbar in units of (MHz micron/V)
+
+
+
+double Efield,dtEfield,Delta,dtDelta;
+
+void *fields (double *t, struct mol *cc){
+  double El0 = 0.69258063 * sqrt( _6um.power/(_6um.wzero*_6um.wzero) ); // V/micron  0.69258063 V/um = sqrt (mW 4.0/(c epsilon0 pi micron^2))
+  double wzero = _6um.wzero; // micron
+  double lambda0 = _6um.lambda0; //micron
+  double wzerosq = wzero*wzero;
+  double lpiw = lambda0/(M_PI*wzerosq); //lambda0 = 5.9 micron, 100 micron waist
+  double lpiwsq = lpiw*lpiw; //lambda0 = 5.9 micron, 100 micron waist
+  
+  double time = *t - cc->tinit;
+  double x=cc->pos[0]+cc->vel[0]*time - _6um.x0;
+  double y=cc->pos[1]+cc->vel[1]*time - _6um.y0;
+  if(fabs(y)<1e-10) y=1e-10;
+  double z=cc->pos[2]+cc->vel[2]*time - _6um.z0;
+  double expo =exp( (-x*x-z*z)/( wzerosq* (1+y*y*lpiwsq) ));
+  double frac = ( 1.0+M_PI*M_PI*wzerosq*wzerosq/(y*y*lambda0*lambda0) );
+  double ylpiwsq = (1.0+y*y*lpiwsq);
+  
+  Efield = El0 *expo / hypot(1,y*lpiw);
+  dtEfield = El0 * cc->vel[1] * y * lambda0*lambda0 * expo / ( M_PI*M_PI*wzerosq*wzerosq * sqrt(1.0+y*y*lpiwsq)*ylpiwsq );
+  dtEfield += El0 * expo * ( ( (- 2.0 * cc->vel[0] * x - 2.0 * cc->vel[2] * z)/(wzerosq * ylpiwsq) ) - ( (2.0 * cc->vel[1] *y *(-x*x-z*z)*lpiwsq)/(wzerosq*ylpiwsq*ylpiwsq) ) ) / sqrt(ylpiwsq);
+  double grad[3] = {-2.0*M_PI*x/(y*frac*lambda0), ( M_PI*(x*x+z*z)/(y*y*frac*lambda0) ) + ( lambda0/(M_PI*wzerosq*ylpiwsq) ) -(2.0*M_PI*M_PI*M_PI*wzerosq*wzerosq*(x*x+z*z)/(y*y*y*y*frac*frac*lambda0*lambda0*lambda0)) -(2.0*M_PI/lambda0), -2.0*M_PI*z/(y*frac*lambda0)};
+  double dtgrad[3];
+  dtgrad[0] = -4.0*M_PI*M_PI*M_PI*cc->vel[1]*wzerosq*wzerosq*x/( y*y*y*y *frac*frac * lambda0*lambda0*lambda0 ) + 2.0*M_PI*cc->vel[1]*x /( y*y*frac*lambda0 ) - 2.0*M_PI*cc->vel[0]/( y*frac*lambda0 );
+  
+  dtgrad[1] = -8.0*M_PI*M_PI*M_PI*M_PI*M_PI*cc->vel[1]*wzerosq*wzerosq*wzerosq*wzerosq*(x*x+z*z)/( y*y*y*y*y*y*y*frac*frac*frac*lambda0*lambda0*lambda0*lambda0*lambda0 ) - 4.0*M_PI*M_PI*M_PI*wzerosq*wzerosq*(cc->vel[0]*x+cc->vel[2]*z)/( y*y*y*y*frac*frac*lambda0*lambda0*lambda0 ) + 10.0*M_PI*M_PI*M_PI*cc->vel[1]*wzerosq*wzerosq*(x*x+z*z)/( y*y*y*y*y*frac*frac*lambda0*lambda0*lambda0 ) + 2.0*M_PI*(cc->vel[0]*x+cc->vel[2]*z)/( y*y*frac*lambda0 ) -2.0*M_PI*cc->vel[1]*(x*x+z*z)/( y*y*y*frac*lambda0 ) -2.0*cc->vel[1]*y*lambda0*lambda0*lambda0/( M_PI*M_PI*M_PI*wzerosq*wzerosq*wzerosq*ylpiwsq*ylpiwsq );
+  
+  dtgrad[2] = 2.0*M_PI* (2.0*M_PI*M_PI*cc->vel[1]*wzerosq*wzerosq*z/( y*y*y*y*frac*frac*lambda0*lambda0*lambda0 ) - cc->vel[2]/( y*frac*lambda0 ) + cc->vel[1]*z/( y*y*frac*lambda0 ));
+  
+  Delta = grad[0]*cc->vel[0]+grad[1]*cc->vel[1]+grad[2]*cc->vel[2];
+  dtDelta = dtgrad[0]*cc->vel[0]+dtgrad[1]*cc->vel[1]+dtgrad[2]*cc->vel[2];
+  //  printf("%.5e \n",grad[1]);
+}
+
+int jac (double t, const double y[], double *dfdy,double dfdt[], void *params){
+  struct mol cc = *(struct mol *)params;
+  fields(&t, &cc);
+  //temp:
+  (void)(t); /* avoid unused parameter warning */
+  //  double mu = *(double *)params;
+  gsl_matrix_view dfdy_mat = gsl_matrix_view_array (dfdy, 3, 3);
+  gsl_matrix * m = &dfdy_mat.matrix;
+  gsl_matrix_set (m, 0, 0, 0.0);
+  gsl_matrix_set (m, 0, 1, -Delta);
+  gsl_matrix_set (m, 0, 2, 0.0);
+  gsl_matrix_set (m, 1, 0, Delta);
+  gsl_matrix_set (m, 1, 1, 0.0);
+  gsl_matrix_set (m, 1, 2, mu*Efield);
+  gsl_matrix_set (m, 2, 0, 0.0);
+  gsl_matrix_set (m, 2, 1, -mu*Efield);
+  gsl_matrix_set (m, 2, 2, 0.0);
+  dfdt[0] = -dtDelta * y[1];
+  dfdt[1] = dtDelta*y[0] + mu*dtEfield*y[2];
+  dfdt[2] = -mu*dtEfield*y[1];
+  return GSL_SUCCESS;
+}
+
+int func (double t, const double y[], double f[], void *params){
+  (void)(t); /* avoid unused parameter warning */
+  struct mol cc = *(struct mol *)params;
+  fields(&t, &cc);
+  //  double mu = *(double *)params;
+  //  f[0] = y[1];
+  //  f[1] = -y[0] - mu*y[1]*(y[0]*y[0] - 1);
+  //  printf("%.16f\t%f\t%f\t%.16f\n", Efield, dtEfield,Delta, -dtDelta);
+  f[0] = -Delta*y[1];
+  f[1] = Delta*y[0]+Efield*mu*y[2];
+  f[2] = -Efield*mu*y[1];
+  return GSL_SUCCESS;
+}

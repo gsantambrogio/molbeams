@@ -1,0 +1,41 @@
+lasers = {
+       _6um =	{	El0	= 0.005;	#in V/um
+       	  		power 	= 5.0;		#in mW
+	  		wzero	= 3000.0;	#in um
+			lambda0 = 5.8326386;	#in um
+			x0	= 0.0;		#in um
+			y0 	= 1000000.0;	#in um
+			z0	= 131800.0;	#in um
+			tinit	= 0.0;		#in us
+			PLength	= 0.0;		#in us
+			};
+       _206nm =	{	El0	= 0.0;
+       	  		power 	= 0.0;
+	  		wzero	= 400.0;
+			lambda0 = 0.206;
+			x0	= 0.0;
+			y0 	= 0.0;
+			z0	= 0.0;
+			tinit	= 0.0;
+			PLength	= 0.0;
+			};
+       _283nm =	{	El0	= 0.0;
+       	  		power 	= 0.0;
+	  		wzero	= 600.0;
+			lambda0 = 0.283;
+			x0	= 0.0;
+			y0 	= 0.0;
+			z0	= 305000.0;
+			tinit	= 924.0;
+			PLength	= 0.0;
+			};
+};
+molSource = {
+	  ValveOpenTime	= 100.0;	#opening time of the valve in us
+	  ValveDia 	= 700.0;	#valve hole diameter
+	  vz		= 330.0;	#average z velocity 
+	  Valve2Laser 	= 70000.0;	#Distance valve laser 206
+	  vx_width	= 0.1;		#FWHM of vel_x distribution in m/s
+	  vy_width	= 0.1;		#FWHM of vel_y distribution in m/s
+	  vz_width	= 0.1;		#FWHM of vel_z distribution in m/s
+};

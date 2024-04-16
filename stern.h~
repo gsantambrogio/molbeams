@@ -1,0 +1,14 @@
+#ifndef FEYNMAN_H
+#define FEYNMAN_H
+
+//extern double pos[3],vel[3],tinit,Efield,dtEfield,Delta;
+
+//when solving the von-neumann diffeq the positions and velocities become parameters
+//thus here the structure to pass infos about the whereabouts of the molecules
+
+int jac (double t, const double y[], double *dfdy,double dfdt[], void *cc);
+int func (double t, const double y[], double f[], void *params);
+
+extern struct laser _6um;
+
+#endif /* FEYNMAN_H */

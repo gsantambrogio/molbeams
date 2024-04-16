@@ -1,0 +1,9 @@
+#!/bin/bash
+for a in `seq 0 20 900`
+do
+gnuplot <<- EOF
+set term gif
+set out "test${a}.gif"
+plot [-150000:150000][-1000:1000]"test.dat" u (\$5-\$8*(\$2-$a+400)):(\$4-\$7*(\$2-$a+400)) t 't=$a'
+EOF
+done
