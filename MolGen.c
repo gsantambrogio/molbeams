@@ -35,7 +35,7 @@ int main (int argc, char *argv[]){
     double y[6];
     
     if(argc < 2){
-        fprintf(stderr,  " The program has different usages.\n Case 1:\n It calculates a distribution of molecules\n generated at position <z nozzle>, excited at a position <z laser>\n by a laser with spotsize of <Radius Laser>,\n and arriving at the entrance of the chip <z chip>.\n Only molecules within +/- halfHeight in the y direction are taken into account.\n All numbers in micron.\n Usage: MolsGen3D 1 <number of molecules> <z nozzle> <z laser> <Radius Laser> <z Chip entrance> \n \n Case 2:\n It returns an homogeneous and isotropic distribution in x, y, z, vx, vy, and vz centered at {0,0,0,0,0,0} (all units in um and us)\n Usage: MolsGen3D 2 <number of molecules> <x width> <y width> <y width> <vx width> <vy width> <vz width>\n\n Case 3:\n It calculates a distribution of molecules\n generated at position <z nozzle>, excited at a position <z laser>\n by a laser with spotsize of <Radius Laser>.\n The laser fires at the right time to capture the middle of the molecular cloud.\n\n");
+        fprintf(stderr,  " The program has different usages.\n Case 1:\n It calculates a distribution of molecules\n generated at position <z nozzle>, excited at a position <z laser>\n by a laser with spotsize of <Radius Laser>,\n and arriving at the entrance of the chip <z chip>.\n Only molecules within +/- halfHeight in the y direction are taken into account.\n All numbers in micron.\n Usage: MolsGen 1 <number of molecules> <z nozzle> <z laser> <Radius Laser> <z Chip entrance> \n \n Case 2:\n It returns an homogeneous and isotropic distribution in x, y, z, vx, vy, and vz centered at {0,0,0,0,0,0} (all units in um and us)\n Usage: MolsGen 2 <number of molecules> <x width> <y width> <z width> <vx width> <vy width> <vz width> <vz>\n\n Case 3:\n It calculates a distribution of molecules\n generated at position <z nozzle>, excited at a position <z laser>\n by a laser with spotsize of <Radius Laser>.\n The laser fires at the right time to capture the middle of the molecular cloud.\n\n");
         return 1;
     }
     int gmod = atoi(argv[1]);
@@ -44,8 +44,8 @@ int main (int argc, char *argv[]){
         fprintf(stderr, " For Case 1:\n Usage: MolsGen3D 1 <number of molecules> <z nozzle> <z laser> <Radius Laser> <z Chip entrance> \n");
         return 1;
     }
-    if(argc != 9 && gmod==2){
-        fprintf(stderr, " For Case 2:\n Usage: MolsGen3D 2 <number of molecules> <x width> <y width> <z width> <vx width> <vy width> <vz width>\n");
+    if(argc != 10 && gmod==2){
+        fprintf(stderr, " For Case 2:\n Usage: MolsGen 2 <number of molecules> <x width> <y width> <z width> <vx width> <vy width> <vz width> <vz>\n");
         return 1;
     }
     if(argc != 6 && gmod==3){
@@ -122,6 +122,7 @@ int main (int argc, char *argv[]){
             double vxwidth = atof(argv[6]);
             double vywidth = atof(argv[7]);
             double vzwidth = atof(argv[8]);
+	    double vz = atof(argv[9]);
             
             gsl_rng * r=gsl_rng_alloc (gsl_rng_mt19937);
             gsl_rng_set(r, 0);
@@ -133,7 +134,7 @@ int main (int argc, char *argv[]){
                 y[5]=zwidth*(gsl_rng_uniform(r)-0.5);
                 y[0]=vxwidth*(gsl_rng_uniform(r)-0.5);
                 y[1]=vywidth*(gsl_rng_uniform(r)-0.5);
-                y[2]=vzwidth*(gsl_rng_uniform(r)-0.5);
+                y[2]=vzwidth*(gsl_rng_uniform(r)-0.5)+vz;
                 printf("%d %.5lf %.5lf %.5lf %.5lf %.5lf %.5lf %.5lf\n", i, 0.0, y[3], y[4], y[5], y[0], y[1], y[2]);
             }
         }
