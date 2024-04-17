@@ -1,29 +1,17 @@
-//
-//  main.cpp
-//  MolsGen
-//
+//A
 //  Created by G Santambrogio on 15/8/14.
 //  Copyright (c) 2014 ambrogio. All rights reserved.
 //
 
-// compile with: g++ -o MolsGen3D main.cpp -O2 -lm -lgsl -lgslcblas
+// compile with: gcc -o MolsGen MolGen.c -O3 -lm -lgsl -lgslcblas -lconfig 
 
 #include <stdio.h>
 #include <math.h>
 #include <gsl/gsl_errno.h>
-#include <gsl/gsl_matrix.h>
-#include <gsl/gsl_odeiv.h>
-#include <gsl/gsl_min.h>
 #include <gsl/gsl_rng.h>
 #include <gsl/gsl_randist.h>
+#include <libconfig.h>
 
-//#include<iomanip>
-#include<fstream>
-#include<iostream>
-
-#include "params3D.h"
-
-using namespace std;
 
 static const double fwhm2sigma = 2.35482; // 2 * sqrt (2*ln(2) )= 2.35482  FWHM=2.35482*sigma
 
@@ -49,11 +37,21 @@ int main (int argc, char *argv[]){
         return 1;
     }
     if(argc != 6 && gmod==3){
-        fprintf(stderr, " For Case 3:\n Usage: MolsGen3D 3 <number of molecules> <z nozzle> <z laser> <Radius Laser>  \n");
+        fprintf(stderr, " For Case 3:\n Usage: MolsGen 3 <number of molecules> <z nozzle> <z laser> <Radius Laser>  \n");
         return 1;
     }
     
-    
+    config_t cfg;
+
+    config_init(&cfg);
+    if(! config_read_file(&cfg, "config.cfg"))
+      {
+      fprintf(stderr, "%s:%d - %s\n", config_error_file(&cfg),
+              config_error_line(&cfg), config_error_text(&cfg));
+      config_destroy(&cfg);
+      return(EXIT_FAILURE);
+    }
+
     switch(gmod){
         case 1:
         {
@@ -62,12 +60,18 @@ int main (int argc, char *argv[]){
             double zlas = atof(argv[4]);
             double lasradius = atof(argv[5]);
             double zChipbegin = atof(argv[6]);
-            
+            double SourceRadius=config_setting_get_float(config_lookup(&cfg, "molSource.ValveDia"));
+	    double velocity=config_setting_get_float(config_lookup(&cfg, "molSource.vz"));
+	    double velFWHM=config_setting_get_float(config_lookup(&cfg, "molSource.vz_width"));
+	    double valveopentime=config_setting_get_float(config_lookup(&cfg, "molSource.ValvePulseDuration"));
+	    double halfHeight=0.5*config_setting_get_float(config_lookup(&cfg, "microchip.entranceSlitHeight"));
+	    double halfWidth=0.5*config_setting_get_float(config_lookup(&cfg, "microchip.arrayWidth"));	    	    
             gsl_rng * r=gsl_rng_alloc (gsl_rng_mt19937);
             gsl_rng_set(r, 0);
             
             //  goodcout<<"#time"<<"\t"<<"x"<<"\t"<<"y"<<"\t"<<"vx"<<"\t"<<"vy"<<endl;
-            cout<<"name"<<"\t"<<"#time"<<"\t"<<"x"<<"\t"<<"y"<<"\t"<<"z"<<"\t"<<"vx"<<"\t"<<"vy"<<"\t"<<"vz"<<endl;
+	    printf("name \t #time \t x \t y \t z \t vx \t vy \t vz \n");
+
             i=0;
             while(i<imax){
                 double rho = SourceRadius*sqrt(gsl_rng_uniform(r));
@@ -126,8 +130,7 @@ int main (int argc, char *argv[]){
             
             gsl_rng * r=gsl_rng_alloc (gsl_rng_mt19937);
             gsl_rng_set(r, 0);
-            
-            cout<<"name"<<"\t"<<"#time"<<"\t"<<"x"<<"\t"<<"y"<<"\t"<<"z"<<"\t"<<"vx"<<"\t"<<"vy"<<"\t"<<"vz"<<endl;
+            printf("name \t #time \t x \t y \t z \t vx \t vy \t vz \n");
             for(i=0;i<imax;i++){
                 y[3]=xwidth*(gsl_rng_uniform(r)-0.5);
                 y[4]=ywidth*(gsl_rng_uniform(r)-0.5);
@@ -145,11 +148,14 @@ int main (int argc, char *argv[]){
             double znozzle = atof(argv[3]);
             double zlas = atof(argv[4]);
             double lasradius = atof(argv[5]);
-            
+            double SourceRadius=config_setting_get_float(config_lookup(&cfg, "molSource.ValveDia"));
+	    double velocity=config_setting_get_float(config_lookup(&cfg, "molSource.vz"));
+	    double velFWHM=config_setting_get_float(config_lookup(&cfg, "molSource.vz_width"));
+	    double valveopentime=config_setting_get_float(config_lookup(&cfg, "molSource.ValvePulseDuration"));	    
             gsl_rng * r=gsl_rng_alloc (gsl_rng_mt19937);
             gsl_rng_set(r, 0);
+	    printf("name \t #time \t x \t y \t z \t vx \t vy \t vz \n");
             
-            cout<<"name"<<"\t"<<"#time"<<"\t"<<"x"<<"\t"<<"y"<<"\t"<<"z"<<"\t"<<"vx"<<"\t"<<"vy"<<"\t"<<"vz"<<endl;
             i=0;
             while(i<imax){
                 double rho = SourceRadius*sqrt(gsl_rng_uniform(r));
