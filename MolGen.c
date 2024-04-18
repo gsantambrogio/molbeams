@@ -70,7 +70,7 @@ int main (int argc, char *argv[]){
             gsl_rng_set(r, 0);
             
             //  goodcout<<"#time"<<"\t"<<"x"<<"\t"<<"y"<<"\t"<<"vx"<<"\t"<<"vy"<<endl;
-	    printf("name \t #time \t x \t y \t z \t vx \t vy \t vz \n");
+	    printf("#name \t time \t x \t y \t z \t vx \t vy \t vz \n");
 
             i=0;
             while(i<imax){
@@ -130,7 +130,7 @@ int main (int argc, char *argv[]){
             
             gsl_rng * r=gsl_rng_alloc (gsl_rng_mt19937);
             gsl_rng_set(r, 0);
-            printf("name \t #time \t x \t y \t z \t vx \t vy \t vz \n");
+            printf("#name \t time \t x \t y \t z \t vx \t vy \t vz \n");
             for(i=0;i<imax;i++){
                 y[3]=xwidth*(gsl_rng_uniform(r)-0.5);
                 y[4]=ywidth*(gsl_rng_uniform(r)-0.5);
@@ -156,7 +156,7 @@ int main (int argc, char *argv[]){
 	    double valveopentime=config_setting_get_float(config_lookup(&cfg, "molSource.ValvePulseDuration"));	    
             gsl_rng * r=gsl_rng_alloc (gsl_rng_mt19937);
             gsl_rng_set(r, 0);
-	    printf("name \t #time \t x \t y \t z \t vx \t vy \t vz \n");
+	    printf("#name \t time \t x \t y \t z \t vx \t vy \t vz \n");
             
             i=0;
             while(i<imax){
