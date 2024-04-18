@@ -148,9 +148,11 @@ int main (int argc, char *argv[]){
             double znozzle = atof(argv[3]);
             double zlas = atof(argv[4]);
             double lasradius = atof(argv[5]);
-            double SourceRadius=config_setting_get_float(config_lookup(&cfg, "molSource.ValveDia"));
+            double SourceRadius=0.5*config_setting_get_float(config_lookup(&cfg, "molSource.ValveDia"));
 	    double velocity=config_setting_get_float(config_lookup(&cfg, "molSource.vz"));
-	    double velFWHM=config_setting_get_float(config_lookup(&cfg, "molSource.vz_width"));
+	    double velxFWHM=config_setting_get_float(config_lookup(&cfg, "molSource.vx_width"));
+	    double velyFWHM=config_setting_get_float(config_lookup(&cfg, "molSource.vy_width"));
+	    double velzFWHM=config_setting_get_float(config_lookup(&cfg, "molSource.vz_width"));	    
 	    double valveopentime=config_setting_get_float(config_lookup(&cfg, "molSource.ValvePulseDuration"));	    
             gsl_rng * r=gsl_rng_alloc (gsl_rng_mt19937);
             gsl_rng_set(r, 0);
@@ -162,16 +164,17 @@ int main (int argc, char *argv[]){
                 double phi = 2.0*M_PI*gsl_rng_uniform(r);
                 y[3] = rho*cos(phi);
                 y[4] = rho*sin(phi);
-                
-                //first approximation: angle = sin = tan: @ 3.5 degrees the error is 7e-5
-                y[2] = velocity+gsl_ran_gaussian(r, velFWHM/fwhm2sigma); // gsl_ran_gaussian(double x, double sigma)
-                double angleY = gsl_ran_gaussian (r, 0.05); //Rotation around Y axis, i.e. in the xz plane
-                double angleX = gsl_ran_gaussian (r, 0.05);// Rotation around X axis, i.e. in the yz plane
+
+		y[0] = gsl_ran_gaussian(r, velxFWHM/fwhm2sigma);
+		y[1] = gsl_ran_gaussian(r, velyFWHM/fwhm2sigma); 		
+                y[2] = velocity+gsl_ran_gaussian(r, velzFWHM/fwhm2sigma); // gsl_ran_gaussian(double x, double sigma)
+		//double angleY = gsl_ran_gaussian (r, 0.05); //Rotation around Y axis, i.e. in the xz plane
+                //double angleX = gsl_ran_gaussian (r, 0.05);// Rotation around X axis, i.e. in the yz plane
                 //now we have some 40 cm of flight and a distribution with a FWHM of about 4 cm, so sigma is about 2 cm
                 //So sigma of the angle is atan(2/40)
 		//NB This is true for Kripton. Think it again for Neon!!!! #############
-                y[1] = y[2]*angleX;
-                y[0] = y[2]*angleY;
+                //y[1] = y[2]*angleX;
+                //y[0] = y[2]*angleY;
                 
                 y[5] = znozzle+velocity*valveopentime*(gsl_rng_uniform(r)-0.5);
                 
@@ -181,8 +184,8 @@ int main (int argc, char *argv[]){
                 // The molecules arrive at the center of the laser spot at a time (zlas-y[5])/y[2]
                 // so the following condition is on time for the z direction, whether the molecules see the laser,
                 // and on space for the x,y directions, assuming that every molecule within the laser spot is excited.
-		double xPosAtLas = y[3]+(zlas - y[5]) * angleY;
-		double yPosAtLas = y[4]+(zlas - y[5]) * angleX;
+		double xPosAtLas = y[3]+tlas*y[0];
+		double yPosAtLas = y[4]+tlas*y[1];
                 if( (((zlas-lasradius-y[5])/y[2])<tlas)
                    && (tlas<((zlas+lasradius-y[5])/y[2]))
 		    && ((xPosAtLas*xPosAtLas+yPosAtLas*yPosAtLas) < (lasradius*lasradius))){
