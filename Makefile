@@ -2,9 +2,6 @@ all: MolGen skimmer 206 283 apertures orifice
 CFLAGS = -Wall -O3 -I/usr/include/libxml2 -I/usr/include 
 LIBS = -L/usr/lib/x86_64-linux-gnu -lgsl -lgslcblas -lm -lpthread -lconfig 
 
-clean:
-	rm *.o trajectoriesswitched trajectoriestime
-
 MolGen : MolGen.c
 	gcc -o MolGen MolGen.c $(CFLAGS) $(LIBS)
 

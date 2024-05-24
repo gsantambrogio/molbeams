@@ -23,7 +23,11 @@ int main (int argc, char *argv[]){
     double y[6];
     
     if(argc < 2){
-        fprintf(stderr,  " The program has different usages.\n Case 1:\n It calculates a distribution of molecules\n generated at position <z nozzle>, excited at a position <z laser>\n by a laser with spotsize of <Radius Laser>,\n and arriving at the entrance of the chip <z chip>.\n Only molecules within +/- halfHeight in the y direction are taken into account.\n All numbers in micron.\n Usage: MolsGen 1 <number of molecules> <z nozzle> <z laser> <Radius Laser> <z Chip entrance> \n \n Case 2:\n It returns an homogeneous and isotropic distribution in x, y, z, vx, vy, and vz centered at {0,0,0,0,0,0} (all units in um and us)\n Usage: MolsGen 2 <number of molecules> <x width> <y width> <z width> <vx width> <vy width> <vz width> <vz>\n\n Case 3:\n It calculates a distribution of molecules\n generated at position <z nozzle>, excited at a position <z laser>\n by a laser with spotsize of <Radius Laser>.\n The laser fires at the right time to capture the middle of the molecular cloud.\n\n");
+        fprintf(stderr,  " The program has different usages.\n\n\ 
+		Case 1:\n It calculates a distribution of molecules\n generated at position <z nozzle>, excited at a position <z laser>\n by a laser with spotsize of <Radius Laser>,\n and arriving at the entrance of the chip <z chip>.\n Only molecules within +/- halfHeight in the y direction are taken into account.\n All numbers in micron.\n Usage: MolsGen 1 <number of molecules> <z nozzle> <z laser> <Radius Laser> <z Chip entrance> \n \n\ 
+		Case 2:\n Like Case 1 but with no chip. It calculates a distribution of molecules\n generated at position <z nozzle>, excited at a position <z laser>\n by a laser with spotsize of <Radius Laser>.\n The laser fires at the right time to capture the middle of the molecular cloud.\n Valve diameter, valve opening duration, average vz, and average v width in all three dimensions is taken from configuration file.\n Usage: MolsGen 3 <number of molecules> <z nozzle> <z laser> <Radius Laser>\n\n\
+		Case 3:\n It returns an homogeneous and isotropic distribution in x, y, z, vx, vy, and vz (hypercubical shape) centered at {0,0,0,0,0,vz} (all units in um and us)\n Usage: MolsGen 2 <number of molecules> <x width> <y width> <z width> <vx width> <vy width> <vz width> <vz>\n\n\
+		Case 4:\n A continuous molecular beam is produced from a round nozzle (diameter in cfg file).\n A laser at z=0, propagating along x, excites the molecules (distance laser-nozzle and waist radius (w_0) from cfg file, assuming total excitation efficiency).\n Widths are expressed as FWHM.\n Usage: MolGen 4 <number of molecules> <vx width> <vy width> <vz width> <vz>\n\n");
         return 1;
     }
     int gmod = atoi(argv[1]);
@@ -32,12 +36,16 @@ int main (int argc, char *argv[]){
         fprintf(stderr, " For Case 1:\n Usage: MolsGen3D 1 <number of molecules> <z nozzle> <z laser> <Radius Laser> <z Chip entrance> \n");
         return 1;
     }
-    if(argc != 10 && gmod==2){
+    if(argc != 10 && gmod==3){
         fprintf(stderr, " For Case 2:\n Usage: MolsGen 2 <number of molecules> <x width> <y width> <z width> <vx width> <vy width> <vz width> <vz>\n");
         return 1;
     }
-    if(argc != 6 && gmod==3){
+    if(argc != 6 && gmod==2){
         fprintf(stderr, " For Case 3:\n Usage: MolsGen 3 <number of molecules> <z nozzle> <z laser> <Radius Laser>  \n");
+        return 1;
+    }
+    if(argc != 7 && gmod==4){
+        fprintf(stderr, " For Case 4:\n MolGen 4 <number of molecules> <vx width> <vy width> <vz width> <vz> \n");
         return 1;
     }
     
@@ -106,20 +114,19 @@ int main (int argc, char *argv[]){
                     double yPosAtChipBegin = y[4]+(zChipbegin - y[5]) * angleX;
                     if( (fabs(xPosAtChipBegin) < halfWidth) && ( fabs(yPosAtChipBegin) < halfHeight) ) {
                         //goodcout<<(xslit-y[2])/y[0]<<"\t"<<xslit<<"\t"<<yPosAtSlit<<"\t"<<y[0]<<"\t"<<y[1]<<endl;
-                        printf("%d %.5lf %.5lf %.5lf %.5lf %.5lf %.5lf %.5lf\n", i, (zChipbegin - y[5])/y[2], xPosAtChipBegin, yPosAtChipBegin, zChipbegin, y[0], y[1], y[2]);
+		      printf("%d %.5lf %.5lf %.5lf %.5lf %.5lf %.5lf %.5lf\n", i, (zChipbegin - y[5])/y[2], xPosAtChipBegin, yPosAtChipBegin, zChipbegin, y[0], y[1], y[2]);
                         i++;
                     }
                     
-                    //        cout<<(xslit-y[2])/y[0]<<"\t"<<xslit<<"\t"<<yPosAtSlit<<"\t"<<y[0]<<"\t"<<y[1]<<endl;
-                }
+		}
                 
             }
-        }
+	}
             break;
             
-        case 2:
+        case 3:
         {
-            int imax = atoi(argv[2]);
+	  int imax = atoi(argv[2]);
             double xwidth = atof(argv[3]);
             double ywidth = atof(argv[4]);
             double zwidth = atof(argv[5]);
@@ -142,7 +149,7 @@ int main (int argc, char *argv[]){
             }
         }
             break;
-        case 3:
+        case 2:
         {
             int imax = atoi(argv[2]);
             double znozzle = atof(argv[3]);
@@ -193,13 +200,49 @@ int main (int argc, char *argv[]){
                         printf("%d %.5lf %.5lf %.5lf %.5lf %.5lf %.5lf %.5lf\n", i, (zlas - y[5])/y[2], xPosAtLas, yPosAtLas, zlas, y[0], y[1], y[2]);
                         i++;
 		}
-                
-            }
-        }
-            break;
+	    }
+	}
+  	break;
+  	case 4:
+        {
+	  int imax = atoi(argv[2]); //number of molecules
+          double velxFWHM = atoi(argv[3]);
+	  double velyFWHM = atoi(argv[4]);
+	  double velzFWHM = atoi(argv[5]);
+          double velz = atoi(argv[6]);
+          double valvepos = - config_setting_get_float(config_lookup(&cfg, "molSource.Valve2Laser")); 
+	  double nozzleradius = 0.5 * config_setting_get_float(config_lookup(&cfg, "molSource.ValveDia"));
+          double lasradius = config_setting_get_float(config_lookup(&cfg, "lasers.nm206.w0")); //assuming cylinder with this radius. Can be improved
+          gsl_rng * r=gsl_rng_alloc (gsl_rng_mt19937);
+          gsl_rng_set(r, 0);
+            
+          printf("#name \t time \t x \t y \t z \t vx \t vy \t vz \n");
 
+          i=0;
+          while(i<imax){
+	    //First calculate at the nozzle
+             double rho = nozzleradius*sqrt(gsl_rng_uniform(r));
+             double phi = 2.0*M_PI*gsl_rng_uniform(r);
+             double x = rho*cos(phi); // x at nozzle
+             double yy = rho*sin(phi); // y at nozzle
+
+	     y[0] = gsl_ran_gaussian(r, velxFWHM/fwhm2sigma);
+ 	     y[1] = gsl_ran_gaussian(r, velyFWHM/fwhm2sigma);
+             y[2] = velz+gsl_ran_gaussian(r, velzFWHM/fwhm2sigma); // gsl_ran_gaussian(double x, double sigma)
+  
+	     //Now position at laser
+  	     y[5] = lasradius * (2.0 * gsl_rng_uniform(r) - 1.0); //gsl_rng_uniform yields [0,1)
+             double tAtNozzle = (valvepos + y[5])/y[2]; //laser
+	     y[4] = yy - tAtNozzle*y[1];
+	  
+	     if ( ( y[4] * y[4] + y[5] * y[5] ) < lasradius*lasradius ){ //within the laser cylinder
+	        y[3] = x - tAtNozzle*y[0]; //calculate only if needed
+	        printf("%d %.5lf %.5lf %.5lf %.5lf %.5lf %.5lf %.5lf\n", i, 0., y[3], y[4], y[5], y[0], y[1], y[2]);
+                i++;
+	     }
+	  }
+	}
+        break;
     }
-    
-    
     return 0;
 }
