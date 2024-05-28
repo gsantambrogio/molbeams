@@ -4,13 +4,13 @@
 
 struct mol{
   int molname;
+  double tinit;
   double pos[3];
   double vel[3];
-  double tinit;
-  int state; 
 };
 
-/* state:
+/* Not used anymore. It was:
+   state:
    1 = a3Pi
    0 = X
 */
