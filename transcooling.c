@@ -26,19 +26,38 @@ pthread_mutex_t readmutex, writemutex;
 //struct electrode StEl;
 
 double t1;
-double allconst, s, Gamma, delta, omegal, omegaz, w0, pos[3], k[3];
+double allconst[2], Gamma, omegaz, laser[2][12];;
 int axis=1;
+
+
 void *trajcalc (void *);
+
+double lasacc(int las, int ver, double y){
+  /* This calculates:
+     acceleration = 1/m hbar k Gamma 0.5 s / (1 + s + (2 (delta + omegal * y * k /c)/Gamma)^2)
+   */
+  double acc = laser[las][ver]*allconst[las] / (1.0 + laser[las][10] + ( ( 2.0 * (laser[las][11] + laser[las][8] * y*laser[las][ver]/c))/ Gamma) * ( ( 2.0 * (laser[las][11] + laser[las][8] * y*laser[las][ver]/c))/ Gamma)   );
+  return acc;
+  
+}
+
+double lasder(int las, int ver, double y){
+  /* This calculates:
+- k[0]*allconst *8.0 * omegal *(delta + y[0]*k[0] * omegal/c)/( c * Gamma * Gamma * (1.0 + s + 4.0*(delta + y[0]*k[0]*omegal/c)*(delta + y[0]*k[0]*omegal/c)/(Gamma*Gamma))*(1.0 + s + 4.0*(delta + y[0]*k[0]*omegal/c)*(delta + y[0]*k[0]*omegal/c)/(Gamma*Gamma)) )
+  */
+  double der = - laser[las][ver]*allconst[las] *8.0 * laser[las][8] *(laser[las][11] + y*laser[las][ver] * laser[las][8]/c)/( c * Gamma * Gamma * (1.0 + laser[las][10] + 4.0*(laser[las][11] + y*laser[las][ver]*laser[las][8]/c)*(laser[las][11] + y*laser[las][ver]*laser[las][8]/c)/(Gamma*Gamma))*(1.0 + laser[las][10] + 4.0*(laser[las][11] + y*laser[las][ver]*laser[las][8]/c)*(laser[las][11] + y*laser[las][ver]*laser[las][8]/c)/(Gamma*Gamma)) );
+    return der;
+}
 
 int func (double t, const double y[], double f[], void *params){
   (void)(t); /* avoid unused parameter warning */ //Forse serve per un laser impulsato
   //  struct mol cc = *(struct mol *)params; //non so se mi serve. Forse si', per conoscere eta' delle molecole
   switch(axis){
   case 1:
-      if ((y[4]*y[4]+y[5]*y[5])<(w0*w0)){
-	f[0] = k[0]*allconst / (1.0 + s + ( ( 2.0 * (delta + omegal * y[0]*k[0]/c))/ Gamma) * ( ( 2.0 * (delta + omegal * y[0]*k[0]/c))/ Gamma)   );
-        f[1] = k[1]*allconst / (1.0 + s + ( ( 2.0 * (delta + omegal * y[1]*k[1]/c))/ Gamma) * ( ( 2.0 * (delta + omegal * y[1]*k[1]/c))/ Gamma)   );  //a_y
-	f[2] = k[2]*allconst / (1.0 + s + ( ( 2.0 * (delta + omegal * y[2]*k[2]/c))/ Gamma) * ( ( 2.0 * (delta + omegal * y[2]*k[2]/c))/ Gamma)   );  //a_z
+      if ((y[4]*y[4]+y[5]*y[5])<(laser[0][6]*laser[0][6])){
+	f[0] = lasacc(0,0,y[0]); //a_x
+        f[1] = lasacc(0,1,y[1]); //a_y
+	f[2] = lasacc(0,2,y[2]); //a_z
       }
       else{
 	f[0] = 0.0;  //a_x
@@ -47,10 +66,10 @@ int func (double t, const double y[], double f[], void *params){
       }
       break;
     case 2:
-      if ((y[3]*y[3]+y[5]*y[5])<(w0*w0)){
-	f[0] = 0.0;  //a_x
-        f[1] = allconst / (1.0 + s + ( ( 2.0 * (delta + omegal * y[0]/c))/ Gamma) * ( ( 2.0 * (delta + omegal * y[0]/c))/ Gamma)   );
-	f[2] = 0.0;  //a_z
+      if ((y[3]*y[3]+y[5]*y[5])<(laser[0][6]*laser[0][6])){
+	f[0] = lasacc(0,0,y[0]); //a_x
+        f[1] = lasacc(0,1,y[1]); //a_y
+	f[2] = lasacc(0,2,y[2]); //a_z
       }
       else{
 	f[0] = 0.0;  //a_x
@@ -59,10 +78,10 @@ int func (double t, const double y[], double f[], void *params){
       }
       break;
     case 3:
-      if ((y[4]*y[4]+y[3]*y[3])<(w0*w0)){
-	f[0] = 0.0;  //a_x
-        f[1] = 0.0;  //a_y
-	f[2] = allconst / (1.0 + s + ( ( 2.0 * (delta + omegal * y[0]/c))/ Gamma) * ( ( 2.0 * (delta + omegal * y[0]/c))/ Gamma)   );
+      if ((y[4]*y[4]+y[3]*y[3])<(laser[0][6]*laser[0][6])){
+		f[0] = lasacc(0,0,y[0]); //a_x
+        f[1] = lasacc(0,1,y[1]); //a_y
+	f[2] = lasacc(0,2,y[2]); //a_z
       }
       else{
 	f[0] = 0.0;  //a_x
@@ -85,21 +104,21 @@ int jac (double t, const double y[], double *dfdy, double dfdt[], void *params){
   double mu = *(double *)params;
   gsl_matrix_view dfdy_mat = gsl_matrix_view_array (dfdy, 6, 6);
   gsl_matrix *m = &dfdy_mat.matrix;
-  gsl_matrix_set (m, 0, 0, - k[0]*allconst *8.0 * omegal *(delta + y[0]*k[0] * omegal/c)/( c * Gamma * Gamma * (1.0 + s + 4.0*(delta + y[0]*k[0]*omegal/c)*(delta + y[0]*k[0]*omegal/c)/(Gamma*Gamma))*(1.0 + s + 4.0*(delta + y[0]*k[0]*omegal/c)*(delta + y[0]*k[0]*omegal/c)/(Gamma*Gamma)) )  );
+  gsl_matrix_set (m, 0, 0, lasder(0,0,y[0]));
   gsl_matrix_set (m, 0, 1, 0.0);
   gsl_matrix_set (m, 0, 2, 0.0);
   gsl_matrix_set (m, 0, 3, 0.0);
   gsl_matrix_set (m, 0, 4, 0.0);
   gsl_matrix_set (m, 0, 5, 0.0);
   gsl_matrix_set (m, 1, 0, 0.0);
-  gsl_matrix_set (m, 1, 1, - k[1]*allconst *8.0 * omegal *(delta + y[1]*k[1] * omegal/c)/( c * Gamma * Gamma * (1.0 + s + 4.0*(delta + y[1]*k[1]*omegal/c)*(delta + y[1]*k[1]*omegal/c)/(Gamma*Gamma))*(1.0 + s + 4.0*(delta + y[1]*k[1]*omegal/c)*(delta + y[1]*k[1]*omegal/c)/(Gamma*Gamma)) )  );
+  gsl_matrix_set (m, 1, 1, lasder(0,1,y[1]));
   gsl_matrix_set (m, 1, 2, 0.0);
   gsl_matrix_set (m, 1, 3, 0.0);
   gsl_matrix_set (m, 1, 4, 0.0);
   gsl_matrix_set (m, 1, 5, 0.0);
   gsl_matrix_set (m, 2, 0, 0.0);
   gsl_matrix_set (m, 2, 1, 0.0);
-  gsl_matrix_set (m, 2, 2, - k[2]*allconst *8.0 * omegal *(delta + y[2]*k[2] * omegal/c)/( c * Gamma * Gamma * (1.0 + s + 4.0*(delta + y[2]*k[2]*omegal/c)*(delta + y[2]*k[2]*omegal/c)/(Gamma*Gamma))*(1.0 + s + 4.0*(delta + y[2]*k[2]*omegal/c)*(delta + y[2]*k[2]*omegal/c)/(Gamma*Gamma)) )  );
+  gsl_matrix_set (m, 2, 2, lasder(0,2,y[2]));
   gsl_matrix_set (m, 2, 3, 0.0);
   gsl_matrix_set (m, 2, 4, 0.0);
   gsl_matrix_set (m, 2, 5, 0.0);
@@ -127,6 +146,7 @@ int jac (double t, const double y[], double *dfdy, double dfdt[], void *params){
   dfdt[3]= 0.0;
   dfdt[4]= 0.0;
   dfdt[5]= 0.0;
+  return GSL_SUCCESS;
 }
 
 int main (int argc, char *argv[]){
@@ -151,18 +171,37 @@ int main (int argc, char *argv[]){
   Gamma = config_setting_get_float(config_lookup(&cfg, "CaF.Gamma"));
   omegaz = config_setting_get_float(config_lookup(&cfg, "CaF.omegaz"));
   double mass =  config_setting_get_float(config_lookup(&cfg, "CaF.mass"));
-  s = config_setting_get_float(config_lookup(&cfg, "lasers.nm531.s"));
-  omegal = config_setting_get_float(config_lookup(&cfg, "lasers.nm531.omegal"));
-  delta = config_setting_get_float(config_lookup(&cfg, "lasers.nm531.delta"));
-  w0 =config_setting_get_float(config_lookup(&cfg, "lasers.nm531.w0"));
-  k[0] =config_setting_get_float_elem(config_lookup(&cfg, "lasers.nm531.propagation"),0);
-  k[1] =config_setting_get_float_elem(config_lookup(&cfg, "lasers.nm531.propagation"),1);
-  k[2] =config_setting_get_float_elem(config_lookup(&cfg, "lasers.nm531.propagation"),2);
-  pos[0] =config_setting_get_float_elem(config_lookup(&cfg, "lasers.nm531.position"),0);
-  pos[1] =config_setting_get_float_elem(config_lookup(&cfg, "lasers.nm531.position"),1);
-  pos[2] =config_setting_get_float_elem(config_lookup(&cfg, "lasers.nm531.position"),2);
-  double hbarkappa = config_setting_get_float(config_lookup(&cfg, "lasers.nm531.hbarkappa"));
-  allconst = hbarkappa * 0.5 * Gamma *  s / mass;
+
+
+  laser[0][0] = config_setting_get_float_elem(config_lookup(&cfg, "lasers.las1.propagation"),0);
+  laser[0][1] = config_setting_get_float_elem(config_lookup(&cfg, "lasers.las1.propagation"),1);
+  laser[0][2] = config_setting_get_float_elem(config_lookup(&cfg, "lasers.las1.propagation"),2);
+  laser[0][3] = config_setting_get_float_elem(config_lookup(&cfg, "lasers.las1.position"),0);
+  laser[0][4] = config_setting_get_float_elem(config_lookup(&cfg, "lasers.las1.position"),1);
+  laser[0][5] = config_setting_get_float_elem(config_lookup(&cfg, "lasers.las1.position"),2);
+  laser[0][6] = config_setting_get_float(config_lookup(&cfg, "lasers.las1.w0"));
+  laser[0][7] = config_setting_get_float(config_lookup(&cfg, "lasers.las1.lambda"));
+  laser[0][8] = config_setting_get_float(config_lookup(&cfg, "lasers.las1.omegal"));
+  laser[0][9] = config_setting_get_float(config_lookup(&cfg, "lasers.las1.hbarkappa"));
+  laser[0][10] = config_setting_get_float(config_lookup(&cfg, "lasers.las1.s"));
+  laser[0][11] = config_setting_get_float(config_lookup(&cfg, "lasers.las1.delta"));
+  allconst[0] = laser[0][9] * 0.5 * Gamma *  laser[0][10] / mass;
+ 
+  laser[1][0] = config_setting_get_float_elem(config_lookup(&cfg, "lasers.las2.propagation"),0);
+  laser[1][1] = config_setting_get_float_elem(config_lookup(&cfg, "lasers.las2.propagation"),1);
+  laser[1][2] = config_setting_get_float_elem(config_lookup(&cfg, "lasers.las2.propagation"),2);
+  laser[1][3] = config_setting_get_float_elem(config_lookup(&cfg, "lasers.las2.position"),0);
+  laser[1][4] = config_setting_get_float_elem(config_lookup(&cfg, "lasers.las2.position"),1);
+  laser[1][5] = config_setting_get_float_elem(config_lookup(&cfg, "lasers.las2.position"),2);
+  laser[1][6] = config_setting_get_float(config_lookup(&cfg, "lasers.las2.w0"));
+  laser[1][7] = config_setting_get_float(config_lookup(&cfg, "lasers.las2.lambda"));
+  laser[1][8] = config_setting_get_float(config_lookup(&cfg, "lasers.las2.omegal"));
+  laser[1][9] = config_setting_get_float(config_lookup(&cfg, "lasers.las2.hbarkappa"));
+  laser[1][10] = config_setting_get_float(config_lookup(&cfg, "lasers.las2.s"));
+  laser[1][11] = config_setting_get_float(config_lookup(&cfg, "lasers.las2.delta"));
+  allconst[1] = laser[1][9] * 0.5 * Gamma *  laser[1][10] / mass;
+
+  
   //  printf("%f\t%f\t%f",k[0],k[1],k[2]);
   //printf("%f\t%f\t%f",pos[0],pos[1],pos[2]);
 
