@@ -1,4 +1,4 @@
-all: MolGen skimmer 206 283 apertures orifice
+all: MolGen skimmer 206 283 apertures orifice transcooling
 CFLAGS = -Wall -O3 -I/usr/include/libxml2 -I/usr/include 
 LIBS = -L/usr/lib/x86_64-linux-gnu -lgsl -lgslcblas -lm -lpthread -lconfig 
 
@@ -19,3 +19,6 @@ apertures : apertures.c
 
 orifice : orifice.c
 	gcc -o orifice orifice.c $(LIBS)
+
+transcooling: transcooling.c
+	gcc -o transcooling transcooling.c $(LIBS)

@@ -9,6 +9,8 @@ struct laser
   double omega;
   double nu;
   double lambda;    //micron
+  double axis;
+  double position[2];
   double x0;         //micron
   double y0;         //micron
   double z0;         //micron
