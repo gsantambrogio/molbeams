@@ -26,7 +26,7 @@ pthread_mutex_t readmutex, writemutex;
 //struct electrode StEl;
 
 double t1;
-double allconst[2], Gamma, omegaz, laser[2][12];;
+double allconst[4], Gamma, omegaz, laser[4][12];;
 
 void *trajcalc (void *);
 
@@ -50,17 +50,21 @@ double lasder(int las, int ver, double y){
 int func (double t, const double y[], double f[], void *params){
   (void)(t); /* avoid unused parameter warning */ //Forse serve per un laser impulsato
   //  struct mol cc = *(struct mol *)params; //non so se mi serve. Forse si', per conoscere eta' delle molecole
-  if ((y[4]*y[4]+(y[5]-laser[0][5])*y[5]-laser[0][5])<(laser[0][6]*laser[0][6])){
-    f[0] = lasacc(0,0,y[0])+lasacc(1,0,y[0]); //a_x
-        f[1] = lasacc(0,1,y[1])+lasacc(1,1,y[1]); //a_y
-	f[2] = lasacc(0,2,y[2])+lasacc(1,2,y[2]); //a_z
-      }
-      else{
-	f[0] = 0.0;  //a_x
-	f[1] = 0.0;  //a_y
-	f[2] = 0.0;  //a_z
-      }
+  f[0] = 0.0;  //a_x
+  f[1] = 0.0;  //a_y
+  f[2] = 0.0;  //a_z
 
+  if ( (y[4]*y[4]+(y[5]-laser[0][5])*(y[5]-laser[0][5]) )<(laser[0][6]*laser[0][6]) ){
+    f[0] += lasacc(0,0,y[0])+lasacc(1,0,y[0]); //a_x
+    f[1] += lasacc(0,1,y[1])+lasacc(1,1,y[1]); //a_y
+    f[2] += lasacc(0,2,y[2])+lasacc(1,2,y[2]); //a_z
+      }
+  if( (y[3]*y[3]+(y[5]-laser[2][5])*(y[5]-laser[2][5]) )< (laser[2][6]*laser[2][6]) ){
+    f[0] += lasacc(2,0,y[0])+lasacc(3,0,y[0]); //a_x
+    f[1] += lasacc(2,1,y[1])+lasacc(3,1,y[1]); //a_y
+    f[2] += lasacc(2,2,y[2])+lasacc(3,2,y[2]); //a_z
+    //    printf("%f\n",lasacc(2,0,y[1])); 
+  }
   f[3] = y[0]; // v_x
   f[4] = y[1]; // v_y
   f[5] = y[2]; // v_z
@@ -68,7 +72,7 @@ int func (double t, const double y[], double f[], void *params){
 
     return GSL_SUCCESS;
 }
-
+/*
 int jac (double t, const double y[], double *dfdy, double dfdt[], void *params){
   (void)(t);
   double mu = *(double *)params;
@@ -118,7 +122,7 @@ int jac (double t, const double y[], double *dfdy, double dfdt[], void *params){
   dfdt[5]= 0.0;
   return GSL_SUCCESS;
 }
-
+*/
 int main (int argc, char *argv[]){
   if (argc != 2) {
     fprintf(stderr, "Usage: transcooling <evolution t in us>  \n");
@@ -171,6 +175,34 @@ int main (int argc, char *argv[]){
   laser[1][11] = config_setting_get_float(config_lookup(&cfg, "lasers.las2.delta"));
   allconst[1] = laser[1][9] * 0.5 * Gamma *  laser[1][10] / mass;
 
+  laser[2][0] = config_setting_get_float_elem(config_lookup(&cfg, "lasers.las3.propagation"),0);
+  laser[2][1] = config_setting_get_float_elem(config_lookup(&cfg, "lasers.las3.propagation"),1);
+  laser[2][2] = config_setting_get_float_elem(config_lookup(&cfg, "lasers.las3.propagation"),2);
+  laser[2][3] = config_setting_get_float_elem(config_lookup(&cfg, "lasers.las3.position"),0);
+  laser[2][4] = config_setting_get_float_elem(config_lookup(&cfg, "lasers.las3.position"),1);
+  laser[2][5] = config_setting_get_float_elem(config_lookup(&cfg, "lasers.las3.position"),2);
+  laser[2][6] = config_setting_get_float(config_lookup(&cfg, "lasers.las3.w0"));
+  laser[2][7] = config_setting_get_float(config_lookup(&cfg, "lasers.las3.lambda"));
+  laser[2][8] = config_setting_get_float(config_lookup(&cfg, "lasers.las3.omegal"));
+  laser[2][9] = config_setting_get_float(config_lookup(&cfg, "lasers.las3.hbarkappa"));
+  laser[2][10] = config_setting_get_float(config_lookup(&cfg, "lasers.las3.s"));
+  laser[2][11] = config_setting_get_float(config_lookup(&cfg, "lasers.las3.delta"));
+  allconst[2] = laser[2][9] * 0.5 * Gamma *  laser[2][10] / mass;
+ 
+  laser[3][0] = config_setting_get_float_elem(config_lookup(&cfg, "lasers.las4.propagation"),0);
+  laser[3][1] = config_setting_get_float_elem(config_lookup(&cfg, "lasers.las4.propagation"),1);
+  laser[3][2] = config_setting_get_float_elem(config_lookup(&cfg, "lasers.las4.propagation"),2);
+  laser[3][3] = config_setting_get_float_elem(config_lookup(&cfg, "lasers.las4.position"),0);
+  laser[3][4] = config_setting_get_float_elem(config_lookup(&cfg, "lasers.las4.position"),1);
+  laser[3][5] = config_setting_get_float_elem(config_lookup(&cfg, "lasers.las4.position"),2);
+  laser[3][6] = config_setting_get_float(config_lookup(&cfg, "lasers.las4.w0"));
+  laser[3][7] = config_setting_get_float(config_lookup(&cfg, "lasers.las4.lambda"));
+  laser[3][8] = config_setting_get_float(config_lookup(&cfg, "lasers.las4.omegal"));
+  laser[3][9] = config_setting_get_float(config_lookup(&cfg, "lasers.las4.hbarkappa"));
+  laser[3][10] = config_setting_get_float(config_lookup(&cfg, "lasers.las4.s"));
+  laser[3][11] = config_setting_get_float(config_lookup(&cfg, "lasers.las4.delta"));
+  allconst[3] = laser[3][9] * 0.5 * Gamma *  laser[3][10] / mass;
+
   
   //  printf("%f\t%f\t%f",k[0],k[1],k[2]);
   //printf("%f\t%f\t%f",pos[0],pos[1],pos[2]);
@@ -201,7 +233,8 @@ void *trajcalc (void *arg){
   struct mol cc;
   char buf[0x1000];
 
-  gsl_odeiv2_system sys = {func, jac, 6, &cc};
+  //  gsl_odeiv2_system sys = {func, jac, 6, &cc};
+  gsl_odeiv2_system sys = {func, NULL, 6, &cc};
   gsl_odeiv2_driver * d = gsl_odeiv2_driver_alloc_y_new (&sys, gsl_odeiv2_step_rk8pd, 1e-6, 1e-6, 0.0);
   //gsl_odeiv2_driver * d = gsl_odeiv2_driver_alloc_y_new (&sys, gsl_odeiv2_step_rk4imp, 1e-6, 1e-6, 0.0);
 
