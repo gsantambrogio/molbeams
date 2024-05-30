@@ -27,16 +27,14 @@ pthread_mutex_t readmutex, writemutex;
 
 double t1;
 double allconst[2], Gamma, omegaz, laser[2][12];;
-int axis=1;
-
 
 void *trajcalc (void *);
 
 double lasacc(int las, int ver, double y){
   /* This calculates:
-     acceleration = 1/m hbar k Gamma 0.5 s / (1 + s + (2 (delta + omegal * y * k /c)/Gamma)^2)
+     acceleration = 1/m hbar k Gamma 0.5 s / (1 + s + (2 (delta - omegal * y * k /c)/Gamma)^2)
    */
-  double acc = laser[las][ver]*allconst[las] / (1.0 + laser[las][10] + ( ( 2.0 * (laser[las][11] + laser[las][8] * y*laser[las][ver]/c))/ Gamma) * ( ( 2.0 * (laser[las][11] + laser[las][8] * y*laser[las][ver]/c))/ Gamma)   );
+  double acc = laser[las][ver]*allconst[las] / (1.0 + laser[las][10] + ( ( 2.0 * (laser[las][11] - laser[las][8] * y*laser[las][ver]/c))/ Gamma) * ( ( 2.0 * (laser[las][11] - laser[las][8] * y*laser[las][ver]/c))/ Gamma)   );
   return acc;
   
 }
@@ -45,51 +43,23 @@ double lasder(int las, int ver, double y){
   /* This calculates:
 - k[0]*allconst *8.0 * omegal *(delta + y[0]*k[0] * omegal/c)/( c * Gamma * Gamma * (1.0 + s + 4.0*(delta + y[0]*k[0]*omegal/c)*(delta + y[0]*k[0]*omegal/c)/(Gamma*Gamma))*(1.0 + s + 4.0*(delta + y[0]*k[0]*omegal/c)*(delta + y[0]*k[0]*omegal/c)/(Gamma*Gamma)) )
   */
-  double der = - laser[las][ver]*allconst[las] *8.0 * laser[las][8] *(laser[las][11] + y*laser[las][ver] * laser[las][8]/c)/( c * Gamma * Gamma * (1.0 + laser[las][10] + 4.0*(laser[las][11] + y*laser[las][ver]*laser[las][8]/c)*(laser[las][11] + y*laser[las][ver]*laser[las][8]/c)/(Gamma*Gamma))*(1.0 + laser[las][10] + 4.0*(laser[las][11] + y*laser[las][ver]*laser[las][8]/c)*(laser[las][11] + y*laser[las][ver]*laser[las][8]/c)/(Gamma*Gamma)) );
+  double der = - laser[las][ver]*allconst[las] *8.0 * laser[las][8] *(laser[las][11] - y*laser[las][ver] * laser[las][8]/c)/( c * Gamma * Gamma * (1.0 + laser[las][10] + 4.0*(laser[las][11] - y*laser[las][ver]*laser[las][8]/c)*(laser[las][11] - y*laser[las][ver]*laser[las][8]/c)/(Gamma*Gamma))*(1.0 + laser[las][10] + 4.0*(laser[las][11] - y*laser[las][ver]*laser[las][8]/c)*(laser[las][11] - y*laser[las][ver]*laser[las][8]/c)/(Gamma*Gamma)) );
     return der;
 }
 
 int func (double t, const double y[], double f[], void *params){
   (void)(t); /* avoid unused parameter warning */ //Forse serve per un laser impulsato
   //  struct mol cc = *(struct mol *)params; //non so se mi serve. Forse si', per conoscere eta' delle molecole
-  switch(axis){
-  case 1:
-      if ((y[4]*y[4]+y[5]*y[5])<(laser[0][6]*laser[0][6])){
-	f[0] = lasacc(0,0,y[0]); //a_x
-        f[1] = lasacc(0,1,y[1]); //a_y
-	f[2] = lasacc(0,2,y[2]); //a_z
+  if ((y[4]*y[4]+(y[5]-laser[0][5])*y[5]-laser[0][5])<(laser[0][6]*laser[0][6])){
+    f[0] = lasacc(0,0,y[0])+lasacc(1,0,y[0]); //a_x
+        f[1] = lasacc(0,1,y[1])+lasacc(1,1,y[1]); //a_y
+	f[2] = lasacc(0,2,y[2])+lasacc(1,2,y[2]); //a_z
       }
       else{
 	f[0] = 0.0;  //a_x
 	f[1] = 0.0;  //a_y
 	f[2] = 0.0;  //a_z
       }
-      break;
-    case 2:
-      if ((y[3]*y[3]+y[5]*y[5])<(laser[0][6]*laser[0][6])){
-	f[0] = lasacc(0,0,y[0]); //a_x
-        f[1] = lasacc(0,1,y[1]); //a_y
-	f[2] = lasacc(0,2,y[2]); //a_z
-      }
-      else{
-	f[0] = 0.0;  //a_x
-	f[1] = 0.0;  //a_y
-	f[2] = 0.0;  //a_z
-      }
-      break;
-    case 3:
-      if ((y[4]*y[4]+y[3]*y[3])<(laser[0][6]*laser[0][6])){
-		f[0] = lasacc(0,0,y[0]); //a_x
-        f[1] = lasacc(0,1,y[1]); //a_y
-	f[2] = lasacc(0,2,y[2]); //a_z
-      }
-      else{
-	f[0] = 0.0;  //a_x
-	f[1] = 0.0;  //a_y
-	f[2] = 0.0;  //a_z
-      }
-      break;
-  }
 
   f[3] = y[0]; // v_x
   f[4] = y[1]; // v_y
@@ -104,21 +74,21 @@ int jac (double t, const double y[], double *dfdy, double dfdt[], void *params){
   double mu = *(double *)params;
   gsl_matrix_view dfdy_mat = gsl_matrix_view_array (dfdy, 6, 6);
   gsl_matrix *m = &dfdy_mat.matrix;
-  gsl_matrix_set (m, 0, 0, lasder(0,0,y[0]));
+  gsl_matrix_set (m, 0, 0, lasder(0,0,y[0])+lasder(1,0,y[0]));
   gsl_matrix_set (m, 0, 1, 0.0);
   gsl_matrix_set (m, 0, 2, 0.0);
   gsl_matrix_set (m, 0, 3, 0.0);
   gsl_matrix_set (m, 0, 4, 0.0);
   gsl_matrix_set (m, 0, 5, 0.0);
   gsl_matrix_set (m, 1, 0, 0.0);
-  gsl_matrix_set (m, 1, 1, lasder(0,1,y[1]));
+  gsl_matrix_set (m, 1, 1, lasder(0,1,y[1])+lasder(1,1,y[1]));
   gsl_matrix_set (m, 1, 2, 0.0);
   gsl_matrix_set (m, 1, 3, 0.0);
   gsl_matrix_set (m, 1, 4, 0.0);
   gsl_matrix_set (m, 1, 5, 0.0);
   gsl_matrix_set (m, 2, 0, 0.0);
   gsl_matrix_set (m, 2, 1, 0.0);
-  gsl_matrix_set (m, 2, 2, lasder(0,2,y[2]));
+  gsl_matrix_set (m, 2, 2, lasder(0,2,y[2])+lasder(1,2,y[2]));
   gsl_matrix_set (m, 2, 3, 0.0);
   gsl_matrix_set (m, 2, 4, 0.0);
   gsl_matrix_set (m, 2, 5, 0.0);

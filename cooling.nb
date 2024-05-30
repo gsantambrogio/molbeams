@@ -1,0 +1,292 @@
+(* Content-type: application/vnd.wolfram.mathematica *)
+
+(*** Wolfram Notebook File ***)
+(* http://www.wolfram.com/nb *)
+
+(* CreatedBy='Mathematica 10.0' *)
+
+(*CacheID: 234*)
+(* Internal cache information:
+NotebookFileLineBreakTest
+NotebookFileLineBreakTest
+NotebookDataPosition[       158,          7]
+NotebookDataLength[      8990,        283]
+NotebookOptionsPosition[      8194,        250]
+NotebookOutlinePosition[      8536,        265]
+CellTagsIndexPosition[      8493,        262]
+WindowFrame->Normal*)
+
+(* Beginning of Notebook Content *)
+Notebook[{
+
+Cell[CellGroupData[{
+Cell[BoxData[{
+ RowBox[{
+  RowBox[{"test", "[", "s_", "]"}], "=", 
+  FractionBox["s", 
+   RowBox[{"1", "+", "s", "+", "4"}]]}], "\[IndentingNewLine]", 
+ RowBox[{"Plot", "[", 
+  RowBox[{
+   RowBox[{"test", "[", "s", "]"}], ",", 
+   RowBox[{"{", 
+    RowBox[{"s", ",", "0", ",", "5"}], "}"}]}], "]"}]}], "Input",
+ CellChangeTimes->{{3.925896548268829*^9, 3.925896620652969*^9}, {
+  3.9258966610052767`*^9, 3.9258966621253405`*^9}}],
+
+Cell[BoxData[
+ FractionBox["s", 
+  RowBox[{"5", "+", "s"}]]], "Output",
+ CellChangeTimes->{3.925896621615024*^9, 3.9258966623093514`*^9}],
+
+Cell[BoxData[
+ GraphicsBox[{{}, {}, 
+   {RGBColor[0.368417, 0.506779, 0.709798], AbsoluteThickness[1.6], Opacity[
+    1.], LineBox[CompressedData["
+1:eJwVjH8803kcxye/WcS3JLfY9ai7UsijWr8evD/qamlEyWNJj0ModbLb7HGu
+UhdufuxGrt31Q5yU6eecfidLq9GYTX4zv753NVuYTMyPGc798Xo8H88/nq+v
+jzIOxC4gEAiB8/ufBeePWnjHnPU1uXtcJu4P9f3rsHYbnRwGYyFZbJrzRlAG
+cllk8gloehhB4Dl9B0nUMDtz8mloNWzmB2EHYXcVOjLhlgXqqexsAzEGhKkb
+03Ru18BVVyKKJ7Dh36hSpyG3u3CnEpwzNWlwdv8PkYNu5bD4ZHLXmWd8sJ66
+XhvvKQOlqCSc4lYMzLe/8LSsZqi2+im7I1QInsX8xielSohUCqpmzB5D3744
+Er7lH0DTuFqb+xyuuKQvL4r8COd4Gr+82xWwlfXib1O5Gvy4tumkodcgab8e
+zPh2ALyO0sLl02/Amzfr6+w/BD7Rp+1fKSRAVW/D19N1QKcqCnufVoPG49mu
+Me0I8K0V6/YmSOGsMWuD6MwokGa4lPhFtWDp8OnEQXc93FCFLbkklYG5wpxq
++2oc/J8U3Q49KIfpemH8JeYkeDRI3/WPKaCPXrrM1dUAEU1mY8oL78EvM+FU
+jXAadLtD8lISG+DP2RfWOyNmQMUIoeu9GiGcJAnoHp2FcPoun3udjUAUr9Wu
+CCUgXcHuoO05TRC76aY+bJ0JIj0saKdtbYak8z8fIOtN0Gmne4VxLc3AGeA3
+19cvQDbMpemfklogwN3+DjHPFD3Lp8jCiK2QLaSIA6LM0JnPKeVOea0gC7ll
+ZG81R+yCW5ulXm0gVjB460wtkK11MEv2vA0enUxB8h4LJA3JjzlMbQdXGmxJ
+eGKJyvgru3kN7bBz7khaYbIV4ggG1gYGdkBM2+svL0KtEaOt5FdKYwf4pqQ+
+jSLboAcLbBYH+CvhEmOkgqixQdsnNtrtECnhwwWBurDSFl21K5OYUzphMLY8
+5m0GEW0SkwWfiztBd8rRUhG1EJmxH7wJcemCUv864zEPOxSkkg5FcLpAHbee
+Yqq3Q5yiA5mzg13gcr+Tn6GwR2nvZlbUHuqGtEjWTQVtESozVby3EnXDhHFZ
+Nq18Ebrs2S/wWNUDqyuuXJOtdEAWU+PdRG4PbIquDnLIckDTj6CGpO4Bcf4S
+Z7neAQ1mFH2opfbCavES7r5wR5QS/Ee5RVEvBJprlzdVOqLWYXWuaLwXdF0q
+Sa07hgQXmA8V+3Fg5GdjWRcxNEjnJlsKcJCbrBze+zuGjAk3DiWV4OB+/KWM
+yMcQL9h2seY2DipvTUruZQz1K3Wr393D4ZAU6a4UYKjiLrsutQyHHV9G5SX3
+5//a10zoK3Bw2nM4vUqKoVcLkyyrmnBIFOqi0msxJH/JafNqwaHBMcNnT918
+/4XFud6Kw289j8fq6jF0zMqQyurAgZC4MLq5FUOx1d4zrr04DBSI4cPHeVcZ
+R5j9OFBN6V8V92Ho/L4RcdcADsVxQ+OxGgydM7H6cZcWh4gNLqX9Axi6tlSY
+4DyMQ0tNImlkBEM9ZbTPojEcvD1tJh+NYkiF1VSuGschh3+jma3HEJOeyciZ
+wMH/ewV3chJDwz59zAgDDiWS6GMvDRjS+nAl0mkczNYY/JKNGLrYkab3msEh
+Kid3ue8shjK3tVlencWhcvSbqbk5DNVd5Bjm5nD4DzqdZ5Y=
+     "]]}},
+  AspectRatio->NCache[GoldenRatio^(-1), 0.6180339887498948],
+  Axes->{True, True},
+  AxesLabel->{None, None},
+  AxesOrigin->{0, 0},
+  DisplayFunction->Identity,
+  Frame->{{False, False}, {False, False}},
+  FrameLabel->{{None, None}, {None, None}},
+  FrameTicks->{{Automatic, Automatic}, {Automatic, Automatic}},
+  GridLines->{None, None},
+  GridLinesStyle->Directive[
+    GrayLevel[0.5, 0.4]],
+  Method->{"DefaultBoundaryStyle" -> Automatic, "ScalingFunctions" -> None},
+  PlotRange->{{0, 5}, {0., 0.49999999489795915`}},
+  PlotRangeClipping->True,
+  PlotRangePadding->{{
+     Scaled[0.02], 
+     Scaled[0.02]}, {
+     Scaled[0.05], 
+     Scaled[0.05]}},
+  Ticks->{Automatic, Automatic}]], "Output",
+ CellChangeTimes->{3.925896621615024*^9, 3.925896662425358*^9}]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+ RowBox[{
+  RowBox[{"func", "[", "v_", "]"}], "=", 
+  FractionBox["1", 
+   RowBox[{"1", "+", "s", "+", 
+    SuperscriptBox[
+     RowBox[{"(", 
+      FractionBox[
+       RowBox[{"2", 
+        RowBox[{"(", 
+         RowBox[{"\[Delta]", "+", 
+          RowBox[{
+           FractionBox["v", "c"], 
+           SubscriptBox["\[Omega]", "l"]}]}], ")"}]}], "\[CapitalGamma]"], 
+      ")"}], "2"]}]]}]], "Input",
+ CellChangeTimes->{{3.925894080632688*^9, 3.9258942272290726`*^9}, {
+  3.9259037723110204`*^9, 3.9259037921391544`*^9}}],
+
+Cell[BoxData[
+ FractionBox["1", 
+  RowBox[{"1", "+", "s", "+", 
+   FractionBox[
+    RowBox[{"4", " ", 
+     SuperscriptBox[
+      RowBox[{"(", 
+       RowBox[{"\[Delta]", "+", 
+        FractionBox[
+         RowBox[{"v", " ", 
+          SubscriptBox["\[Omega]", "l"]}], "c"]}], ")"}], "2"]}], 
+    SuperscriptBox["\[CapitalGamma]", "2"]]}]]], "Output",
+ CellChangeTimes->{3.925894227845108*^9, 3.9259038071080103`*^9}]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+ RowBox[{"D", "[", 
+  RowBox[{
+   RowBox[{"func", "[", "v", "]"}], ",", "v"}], "]"}]], "Input",
+ CellChangeTimes->{{3.925894230186242*^9, 3.9258942369946313`*^9}}],
+
+Cell[BoxData[
+ RowBox[{"-", 
+  FractionBox[
+   RowBox[{"8", " ", 
+    SubscriptBox["\[Omega]", "l"], " ", 
+    RowBox[{"(", 
+     RowBox[{"\[Delta]", "+", 
+      FractionBox[
+       RowBox[{"v", " ", 
+        SubscriptBox["\[Omega]", "l"]}], "c"]}], ")"}]}], 
+   RowBox[{"c", " ", 
+    SuperscriptBox["\[CapitalGamma]", "2"], " ", 
+    SuperscriptBox[
+     RowBox[{"(", 
+      RowBox[{"1", "+", "s", "+", 
+       FractionBox[
+        RowBox[{"4", " ", 
+         SuperscriptBox[
+          RowBox[{"(", 
+           RowBox[{"\[Delta]", "+", 
+            FractionBox[
+             RowBox[{"v", " ", 
+              SubscriptBox["\[Omega]", "l"]}], "c"]}], ")"}], "2"]}], 
+        SuperscriptBox["\[CapitalGamma]", "2"]]}], ")"}], "2"]}]]}]], "Output",
+ CellChangeTimes->{3.925894237479659*^9, 3.925903808588095*^9}]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+ RowBox[{
+  RowBox[{"funcm", "[", "v_", "]"}], "=", 
+  FractionBox["1", 
+   RowBox[{"1", "+", "s", "+", 
+    SuperscriptBox[
+     RowBox[{"(", 
+      FractionBox[
+       RowBox[{"2", 
+        RowBox[{"(", 
+         RowBox[{
+          RowBox[{
+           RowBox[{"(", 
+            RowBox[{"1", "+", 
+             FractionBox[
+              RowBox[{"-", "v"}], "c"]}], ")"}], 
+           SubscriptBox["\[Omega]", "l"]}], "-", 
+          SubscriptBox["\[Omega]", "0"]}], ")"}]}], "\[CapitalGamma]"], ")"}],
+      "2"]}]]}]], "Input",
+ CellChangeTimes->{{3.9258943243476276`*^9, 3.9258943331681323`*^9}}],
+
+Cell[BoxData[
+ FractionBox["1", 
+  RowBox[{"1", "+", "s", "+", 
+   FractionBox[
+    RowBox[{"4", " ", 
+     SuperscriptBox[
+      RowBox[{"(", 
+       RowBox[{
+        RowBox[{"-", 
+         SubscriptBox["\[Omega]", "0"]}], "+", 
+        RowBox[{
+         RowBox[{"(", 
+          RowBox[{"1", "-", 
+           FractionBox["v", "c"]}], ")"}], " ", 
+         SubscriptBox["\[Omega]", "l"]}]}], ")"}], "2"]}], 
+    SuperscriptBox["\[CapitalGamma]", "2"]]}]]], "Output",
+ CellChangeTimes->{{3.9258943263897443`*^9, 3.925894334410203*^9}}]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+ RowBox[{"D", "[", 
+  RowBox[{
+   RowBox[{"funcm", "[", "v", "]"}], ",", "v"}], "]"}]], "Input",
+ CellChangeTimes->{{3.925894622025654*^9, 3.925894628819042*^9}}],
+
+Cell[BoxData[
+ FractionBox[
+  RowBox[{"8", " ", 
+   SubscriptBox["\[Omega]", "l"], " ", 
+   RowBox[{"(", 
+    RowBox[{
+     RowBox[{"-", 
+      SubscriptBox["\[Omega]", "0"]}], "+", 
+     RowBox[{
+      RowBox[{"(", 
+       RowBox[{"1", "-", 
+        FractionBox["v", "c"]}], ")"}], " ", 
+      SubscriptBox["\[Omega]", "l"]}]}], ")"}]}], 
+  RowBox[{"c", " ", 
+   SuperscriptBox["\[CapitalGamma]", "2"], " ", 
+   SuperscriptBox[
+    RowBox[{"(", 
+     RowBox[{"1", "+", "s", "+", 
+      FractionBox[
+       RowBox[{"4", " ", 
+        SuperscriptBox[
+         RowBox[{"(", 
+          RowBox[{
+           RowBox[{"-", 
+            SubscriptBox["\[Omega]", "0"]}], "+", 
+           RowBox[{
+            RowBox[{"(", 
+             RowBox[{"1", "-", 
+              FractionBox["v", "c"]}], ")"}], " ", 
+            SubscriptBox["\[Omega]", "l"]}]}], ")"}], "2"]}], 
+       SuperscriptBox["\[CapitalGamma]", "2"]]}], ")"}], "2"]}]]], "Output",
+ CellChangeTimes->{3.925894629498081*^9}]
+}, Open  ]]
+},
+WindowSize->{767, 853},
+WindowMargins->{{Automatic, 568}, {54, Automatic}},
+FrontEndVersion->"10.0 for Microsoft Windows (64-bit) (July 1, 2014)",
+StyleDefinitions->"Default.nb"
+]
+(* End of Notebook Content *)
+
+(* Internal cache information *)
+(*CellTagsOutline
+CellTagsIndex->{}
+*)
+(*CellTagsIndex
+CellTagsIndex->{}
+*)
+(*NotebookFileOutline
+Notebook[{
+Cell[CellGroupData[{
+Cell[580, 22, 429, 11, 66, "Input"],
+Cell[1012, 35, 137, 3, 44, "Output"],
+Cell[1152, 40, 2621, 53, 236, "Output"]
+}, Open  ]],
+Cell[CellGroupData[{
+Cell[3810, 98, 538, 16, 71, "Input"],
+Cell[4351, 116, 417, 12, 66, "Output"]
+}, Open  ]],
+Cell[CellGroupData[{
+Cell[4805, 133, 177, 4, 31, "Input"],
+Cell[4985, 139, 810, 24, 114, "Output"]
+}, Open  ]],
+Cell[CellGroupData[{
+Cell[5832, 168, 614, 19, 71, "Input"],
+Cell[6449, 189, 534, 16, 65, "Output"]
+}, Open  ]],
+Cell[CellGroupData[{
+Cell[7020, 210, 176, 4, 31, "Input"],
+Cell[7199, 216, 979, 31, 75, "Output"]
+}, Open  ]]
+}
+]
+*)
+
+(* End of internal cache information *)
