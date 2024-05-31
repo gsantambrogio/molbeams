@@ -26,7 +26,7 @@ pthread_mutex_t readmutex, writemutex;
 //struct electrode StEl;
 
 double t1;
-double allconst[4], Gamma, omegaz, laser[4][12];;
+double allconst[5], Gamma, omegaz, laser[5][12];;
 
 void *trajcalc (void *);
 
@@ -65,6 +65,12 @@ int func (double t, const double y[], double f[], void *params){
     f[2] += lasacc(2,2,y[2])+lasacc(3,2,y[2]); //a_z
     //    printf("%f\n",lasacc(2,0,y[1])); 
   }
+  //    printf("ok");
+  if( (y[3]*y[3]+y[4]*y[4])< (laser[4][6]*laser[4][6]) ){
+    f[0] += lasacc(4,0,y[0]); //a_x
+    f[1] += lasacc(4,1,y[1]); //a_y
+    f[2] += lasacc(4,2,y[2]); //a_z
+    }
   f[3] = y[0]; // v_x
   f[4] = y[1]; // v_y
   f[5] = y[2]; // v_z
@@ -203,6 +209,21 @@ int main (int argc, char *argv[]){
   laser[3][11] = config_setting_get_float(config_lookup(&cfg, "lasers.las4.delta"));
   allconst[3] = laser[3][9] * 0.5 * Gamma *  laser[3][10] / mass;
 
+  //  printf("po");
+
+  laser[4][0] = config_setting_get_float_elem(config_lookup(&cfg, "lasers.las5.propagation"),0);
+  laser[4][1] = config_setting_get_float_elem(config_lookup(&cfg, "lasers.las5.propagation"),1);
+  laser[4][2] = config_setting_get_float_elem(config_lookup(&cfg, "lasers.las5.propagation"),2);
+  laser[4][3] = config_setting_get_float_elem(config_lookup(&cfg, "lasers.las5.position"),0);
+  laser[4][4] = config_setting_get_float_elem(config_lookup(&cfg, "lasers.las5.position"),1);
+  laser[4][5] = config_setting_get_float_elem(config_lookup(&cfg, "lasers.las5.position"),2);
+  laser[4][6] = config_setting_get_float(config_lookup(&cfg, "lasers.las5.w0"));
+  laser[4][7] = config_setting_get_float(config_lookup(&cfg, "lasers.las5.lambda"));
+  laser[4][8] = config_setting_get_float(config_lookup(&cfg, "lasers.las5.omegal"));
+  laser[4][9] = config_setting_get_float(config_lookup(&cfg, "lasers.las5.hbarkappa"));
+  laser[4][10] = config_setting_get_float(config_lookup(&cfg, "lasers.las5.s"));
+  laser[4][11] = config_setting_get_float(config_lookup(&cfg, "lasers.las5.delta"));
+  allconst[4] = laser[4][9] * 0.5 * Gamma *  laser[4][10] / mass;
   
   //  printf("%f\t%f\t%f",k[0],k[1],k[2]);
   //printf("%f\t%f\t%f",pos[0],pos[1],pos[2]);
