@@ -8,35 +8,35 @@
 #include <pthread.h>
 #include <math.h>
 #include <libconfig.h>
-#include "dip_dynamics.h"
+#include <gsl/gsl_rng.h>
+#include <gsl/gsl_randist.h>
 #include "molecules.h"
-#include "lasers.h"
 
-#ifdef NAN
-/* NAN is supported */
-#endif
-#define NUM_THREADS 1
+#define NUM_THREADS 4
 
 #define hbar 0.063507799 //units: amu um^2/us
 #define c 2.9979246e+08  //units um/us = m/s
 
 pthread_mutex_t readmutex, writemutex;
-
-//struct laser IPG;
-//struct electrode StEl;
+gsl_rng * r;
 
 double t1;
-double allconst[5], Gamma, omegaz, laser[5][12];;
+double allconst[5], Gamma, omegaz, laser[5][13];
 
 void *trajcalc (void *);
 
-double lasacc(int las, int ver, double y){
+double lasacc(int las, int ver, double y, double t){
   /* This calculates:
      acceleration = 1/m hbar k Gamma 0.5 s / (1 + s + (2 (delta - omegal * y * k /c)/Gamma)^2)
    */
-  double acc = laser[las][ver]*allconst[las] / (1.0 + laser[las][10] + ( ( 2.0 * (laser[las][11] - laser[las][8] * y*laser[las][ver]/c))/ Gamma) * ( ( 2.0 * (laser[las][11] - laser[las][8] * y*laser[las][ver]/c))/ Gamma)   );
-  return acc;
-  
+  //This was with the random broadening. Too slow
+  //    double acc = laser[las][ver]*allconst[las] / (1.0 + laser[las][10] + ( ( 2.0 * (laser[las][12]*(gsl_rng_uniform(r)-0.5)+laser[las][11] - laser[las][8] * y*laser[las][ver]/c))/ Gamma) * ( ( 2.0 * (laser[las][12]*(gsl_rng_uniform(r)-0.5)+laser[las][11] - laser[las][8] * y*laser[las][ver]/c))/ Gamma)   );
+  //This is with static detuning:
+  //      double acc = laser[las][ver]*allconst[las] / (1.0 + laser[las][10] + ( ( 2.0 * (laser[las][11] - laser[las][8] * y*laser[las][ver]/c))/ Gamma) * ( ( 2.0 * (laser[las][11] - laser[las][8] * y*laser[las][ver]/c))/ Gamma)   );
+  double acc = laser[las][ver]*allconst[las] / (1.0 + laser[las][10] + ( ( 2.0 * (laser[las][11]+laser[las][12]*t - laser[las][8] * y*laser[las][ver]/c))/ Gamma) * ( ( 2.0 * (laser[las][11]+laser[las][12]*t - laser[las][8] * y*laser[las][ver]/c))/ Gamma)   );
+      
+
+  return acc;  
 }
 
 double lasder(int las, int ver, double y){
@@ -48,33 +48,31 @@ double lasder(int las, int ver, double y){
 }
 
 int func (double t, const double y[], double f[], void *params){
-  (void)(t); /* avoid unused parameter warning */ //Forse serve per un laser impulsato
+  //(void)(t); /* avoid unused parameter warning */ //Forse serve per un laser impulsato
   //  struct mol cc = *(struct mol *)params; //non so se mi serve. Forse si', per conoscere eta' delle molecole
   f[0] = 0.0;  //a_x
   f[1] = 0.0;  //a_y
   f[2] = 0.0;  //a_z
 
   if ( (y[4]*y[4]+(y[5]-laser[0][5])*(y[5]-laser[0][5]) )<(laser[0][6]*laser[0][6]) ){
-    f[0] += lasacc(0,0,y[0])+lasacc(1,0,y[0]); //a_x
-    f[1] += lasacc(0,1,y[1])+lasacc(1,1,y[1]); //a_y
-    f[2] += lasacc(0,2,y[2])+lasacc(1,2,y[2]); //a_z
+    f[0] += lasacc(0,0,y[0],t)+lasacc(1,0,y[0],t); //a_x
+    f[1] += lasacc(0,1,y[1],t)+lasacc(1,1,y[1],t); //a_y
+    f[2] += lasacc(0,2,y[2],t)+lasacc(1,2,y[2],t); //a_z
       }
   if( (y[3]*y[3]+(y[5]-laser[2][5])*(y[5]-laser[2][5]) )< (laser[2][6]*laser[2][6]) ){
-    f[0] += lasacc(2,0,y[0])+lasacc(3,0,y[0]); //a_x
-    f[1] += lasacc(2,1,y[1])+lasacc(3,1,y[1]); //a_y
-    f[2] += lasacc(2,2,y[2])+lasacc(3,2,y[2]); //a_z
+    f[0] += lasacc(2,0,y[0],t)+lasacc(3,0,y[0],t); //a_x
+    f[1] += lasacc(2,1,y[1],t)+lasacc(3,1,y[1],t); //a_y
+    f[2] += lasacc(2,2,y[2],t)+lasacc(3,2,y[2],t); //a_z
     //    printf("%f\n",lasacc(2,0,y[1])); 
   }
-  //    printf("ok");
   if( (y[3]*y[3]+y[4]*y[4])< (laser[4][6]*laser[4][6]) ){
-    f[0] += lasacc(4,0,y[0]); //a_x
-    f[1] += lasacc(4,1,y[1]); //a_y
-    f[2] += lasacc(4,2,y[2]); //a_z
+    f[0] += lasacc(4,0,y[0],t); //a_x
+    f[1] += lasacc(4,1,y[1],t); //a_y
+    f[2] += lasacc(4,2,y[2],t); //a_z
     }
   f[3] = y[0]; // v_x
   f[4] = y[1]; // v_y
   f[5] = y[2]; // v_z
-  //    printf("ok\n");
 
     return GSL_SUCCESS;
 }
@@ -138,7 +136,6 @@ int main (int argc, char *argv[]){
   t1 = atof(argv[1]);
 
   config_t cfg;
-  
   config_init(&cfg);
   if(! config_read_file(&cfg, "config.cfg"))
     {
@@ -164,7 +161,8 @@ int main (int argc, char *argv[]){
   laser[0][8] = config_setting_get_float(config_lookup(&cfg, "lasers.las1.omegal"));
   laser[0][9] = config_setting_get_float(config_lookup(&cfg, "lasers.las1.hbarkappa"));
   laser[0][10] = config_setting_get_float(config_lookup(&cfg, "lasers.las1.s"));
-  laser[0][11] = config_setting_get_float(config_lookup(&cfg, "lasers.las1.delta"));
+  laser[0][11] = config_setting_get_float(config_lookup(&cfg, "lasers.las1.delta0"));
+  laser[4][12] = config_setting_get_float(config_lookup(&cfg, "lasers.las1.delta1"));
   allconst[0] = laser[0][9] * 0.5 * Gamma *  laser[0][10] / mass;
  
   laser[1][0] = config_setting_get_float_elem(config_lookup(&cfg, "lasers.las2.propagation"),0);
@@ -178,7 +176,8 @@ int main (int argc, char *argv[]){
   laser[1][8] = config_setting_get_float(config_lookup(&cfg, "lasers.las2.omegal"));
   laser[1][9] = config_setting_get_float(config_lookup(&cfg, "lasers.las2.hbarkappa"));
   laser[1][10] = config_setting_get_float(config_lookup(&cfg, "lasers.las2.s"));
-  laser[1][11] = config_setting_get_float(config_lookup(&cfg, "lasers.las2.delta"));
+  laser[1][11] = config_setting_get_float(config_lookup(&cfg, "lasers.las2.delta0"));
+  laser[4][12] = config_setting_get_float(config_lookup(&cfg, "lasers.las2.delta1"));
   allconst[1] = laser[1][9] * 0.5 * Gamma *  laser[1][10] / mass;
 
   laser[2][0] = config_setting_get_float_elem(config_lookup(&cfg, "lasers.las3.propagation"),0);
@@ -192,7 +191,8 @@ int main (int argc, char *argv[]){
   laser[2][8] = config_setting_get_float(config_lookup(&cfg, "lasers.las3.omegal"));
   laser[2][9] = config_setting_get_float(config_lookup(&cfg, "lasers.las3.hbarkappa"));
   laser[2][10] = config_setting_get_float(config_lookup(&cfg, "lasers.las3.s"));
-  laser[2][11] = config_setting_get_float(config_lookup(&cfg, "lasers.las3.delta"));
+  laser[2][11] = config_setting_get_float(config_lookup(&cfg, "lasers.las3.delta0"));
+  laser[4][12] = config_setting_get_float(config_lookup(&cfg, "lasers.las3.delta1"));
   allconst[2] = laser[2][9] * 0.5 * Gamma *  laser[2][10] / mass;
  
   laser[3][0] = config_setting_get_float_elem(config_lookup(&cfg, "lasers.las4.propagation"),0);
@@ -206,10 +206,9 @@ int main (int argc, char *argv[]){
   laser[3][8] = config_setting_get_float(config_lookup(&cfg, "lasers.las4.omegal"));
   laser[3][9] = config_setting_get_float(config_lookup(&cfg, "lasers.las4.hbarkappa"));
   laser[3][10] = config_setting_get_float(config_lookup(&cfg, "lasers.las4.s"));
-  laser[3][11] = config_setting_get_float(config_lookup(&cfg, "lasers.las4.delta"));
+  laser[3][11] = config_setting_get_float(config_lookup(&cfg, "lasers.las4.delta0"));
+  laser[4][12] = config_setting_get_float(config_lookup(&cfg, "lasers.las4.delta1"));
   allconst[3] = laser[3][9] * 0.5 * Gamma *  laser[3][10] / mass;
-
-  //  printf("po");
 
   laser[4][0] = config_setting_get_float_elem(config_lookup(&cfg, "lasers.las5.propagation"),0);
   laser[4][1] = config_setting_get_float_elem(config_lookup(&cfg, "lasers.las5.propagation"),1);
@@ -222,12 +221,16 @@ int main (int argc, char *argv[]){
   laser[4][8] = config_setting_get_float(config_lookup(&cfg, "lasers.las5.omegal"));
   laser[4][9] = config_setting_get_float(config_lookup(&cfg, "lasers.las5.hbarkappa"));
   laser[4][10] = config_setting_get_float(config_lookup(&cfg, "lasers.las5.s"));
-  laser[4][11] = config_setting_get_float(config_lookup(&cfg, "lasers.las5.delta"));
+  laser[4][11] = config_setting_get_float(config_lookup(&cfg, "lasers.las5.delta0"));
+  laser[4][12] = config_setting_get_float(config_lookup(&cfg, "lasers.las5.delta1"));
   allconst[4] = laser[4][9] * 0.5 * Gamma *  laser[4][10] / mass;
   
   //  printf("%f\t%f\t%f",k[0],k[1],k[2]);
   //printf("%f\t%f\t%f",pos[0],pos[1],pos[2]);
+  r = gsl_rng_alloc (gsl_rng_mt19937);
+  gsl_rng_set(r, 0);
 
+    
   pthread_t thread[NUM_THREADS];
   pthread_attr_t attr;
   void *joinstatus;

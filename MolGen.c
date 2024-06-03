@@ -1,4 +1,4 @@
-//A
+//
 //  Created by G Santambrogio on 15/8/14.
 //  Copyright (c) 2014 ambrogio. All rights reserved.
 //
