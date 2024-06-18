@@ -20,5 +20,5 @@ apertures : apertures.c
 orifice : orifice.c
 	gcc -o orifice orifice.c $(LIBS)
 
-transcooling: transcooling.c
-	gcc -o transcooling transcooling.c $(LIBS)
+transcooling: transcooling02.c
+	gcc -o transcooling transcooling02.c $(LIBS)
