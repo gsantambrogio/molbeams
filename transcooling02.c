@@ -34,7 +34,9 @@ double lasacc(int lasnr, int ver, double y, double t){
   // Detuning: delta0 - omega * y * ver / c
   double detuning = las[lasnr].delta0+las[lasnr].delta1*t - las[lasnr].omega * y *las[lasnr].propagation[ver] / c;
   double fraction = las[lasnr].s / (1.0 + las[lasnr].s + ( 2.0 * detuning / Gamma) * ( 2.0 * detuning / Gamma)  );
-  double acc = las[lasnr].propagation[ver]*las[lasnr].constA * fraction + sqrt( las[lasnr].constB * fraction) * gsl_ran_gaussian(r, 1);
+  //double acc = las[lasnr].propagation[ver]*las[lasnr].constA * fraction + sqrt( las[lasnr].constB * fraction) * gsl_ran_gaussian(r, 1);
+  double acc = las[lasnr].propagation[ver]*las[lasnr].constA * fraction;// + sqrt( las[lasnr].constB * fraction) * gsl_ran_gaussian(r, 1);
+ 
   return acc;  
 }
 

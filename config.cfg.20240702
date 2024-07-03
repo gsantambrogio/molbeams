@@ -48,50 +48,50 @@ lasers = {
 			lambda	=0.531; # in micron
 			omegal = 3.5473664e+09; # nu * 2 pi = 2 pi c/lambda; in MHz
 			hbarkappa = 0.75147132; # in amu um/us
-			s = 5.0;
+			s = 2.0;
 			delta = -10.0; # in omega = 2 pi nu; in MHz
 };
 	las1 = {	propagation = [1.0,0.0,0.0]; #Norm must be 1
-	       		position = [0.0,0.0,100000.0]; #position on the intersection with axis z
+	       		position = [0.0,0.0,15000.0]; #position on the intersection with axis z
 			w0  = 10000.0; # in micron
 			lambda	=0.531; # in micron
 			omegal = 3.5473664e+09; # nu * 2 pi = 2 pi c/lambda; in MHz
 			hbarkappa = 0.75147132; # in amu um/us
 			hbarkappasq = 8.8919653; # in amu/us
-			s = 1.0;
+			s = 2.0;
 			delta0 = -15.0; # in omega = 2 pi nu; in MHz
 			delta1 = 0.0;
 };
 	las2 = {	propagation = [-1.0,0.0,0.0]; #Norm must be 1
-	       		position = [0.0,0.0,100000.0]; #position on the intersection with axis z
+	       		position = [0.0,0.0,15000.0]; #position on the intersection with axis z
 			w0  = 10000.0; # in micron
 			lambda	=0.531; # in micron
 			omegal = 3.5473664e+09; # nu * 2 pi = 2 pi c/lambda; in MHz
 			hbarkappa = 0.75147132; # in amu um/us
 			hbarkappasq = 8.8919653; # in amu/us
-			s = 1.0;
+			s = 2.0;
 			delta0 = -15.0; # in omega = 2 pi nu; in MHz
 			delta1 = 0.0;
 			};
 	las3 = {	propagation = [0.0,1.0,0.0]; #Norm must be 1
-	       		position = [0.0,0.0,100000.0]; #position on the intersection with axis z
+	       		position = [0.0,0.0,15000.0]; #position on the intersection with axis z
 			w0  = 10000.0; # in micron
 			lambda	=0.531; # in micron
 			omegal = 3.5473664e+09; # nu * 2 pi = 2 pi c/lambda; in MHz
 			hbarkappa = 0.75147132; # in amu um/us
 			hbarkappasq = 8.8919653; # in amu/us
-			s = 1.0;
+			s = 2.0;
 			delta0 = -15.0; # in omega = 2 pi nu; in MHz
 			delta1 = 0.0;
 };
 	las4 = {	propagation = [0.0,-1.0,0.0]; #Norm must be 1
-	       		position = [0.0,0.0,100000.0]; #position on the intersection with axis z
+	       		position = [0.0,0.0,15000.0]; #position on the intersection with axis z
 			w0  = 10000.0; # in micron
 			lambda	=0.531; # in micron
 			omegal = 3.5473664e+09; # nu * 2 pi = 2 pi c/lambda; in MHz
 			hbarkappa = 0.75147132; # in amu um/us
 			hbarkappasq = 8.8919653; # in amu/us
-			s = 1.0;
+			s = 2.0;
 			delta0 = -15.0; # in omega = 2 pi nu; in MHz
 			delta1 = 0.0;
 };
@@ -104,7 +104,7 @@ lasers = {
 			hbarkappasq = 8.8919653; # in amu/us
 			s = 5.0;
 			delta0 = -1700.0; # in omega = 2 pi nu; in MHz
-			delta1 = 0.3;
+			delta1 = 0.40;
 };
 
 	IPG =	{	El0	= 0.0;

@@ -1,0 +1,13 @@
+#!/bin/bash
+for a in `seq 0 100 4000`
+do
+./transcooling $a <test.dat > e3-$a.out
+gnuplot <<- EOF
+set term gif
+set out "test${a}.gif"
+splot [-3000:3000][-3000:3000][0:500000] "e3-$a.out" u 3:4:5 t 't=$a' , "test.dat" u 3:4:5
+EOF
+rm e3-$a.out
+done
+convert test?.gif test???.gif test????.gif -delay 50 -loop 0 film.gif
+rm -r test*.gif
