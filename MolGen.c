@@ -25,8 +25,8 @@ int main (int argc, char *argv[]){
     if(argc < 2){
         fprintf(stderr,  " The program has different usages.\n\n\ 
 		Case 1:\n It calculates a distribution of molecules\n generated at position <z nozzle>, excited at a position <z laser>\n by a laser with spotsize of <Radius Laser>,\n and arriving at the entrance of the chip <z chip>.\n Only molecules within +/- halfHeight in the y direction are taken into account.\n All numbers in micron.\n Usage: MolsGen 1 <number of molecules> <z nozzle> <z laser> <Radius Laser> <z Chip entrance> \n \n\ 
-		Case 2:\n Like Case 1 but with no chip. It calculates a distribution of molecules\n generated at position <z nozzle>, excited at a position <z laser>\n by a laser with spotsize of <Radius Laser>.\n The laser fires at the right time to capture the middle of the molecular cloud.\n Valve diameter, valve opening duration, average vz, and average v width in all three dimensions is taken from configuration file.\n Usage: MolsGen 3 <number of molecules> <z nozzle> <z laser> <Radius Laser>\n\n\
-		Case 3:\n It returns an homogeneous and isotropic distribution in x, y, z, vx, vy, and vz (hypercubical shape) centered at {0,0,0,0,0,vz} (all units in um and us)\n Usage: MolsGen 2 <number of molecules> <x width> <y width> <z width> <vx width> <vy width> <vz width> <vz>\n\n\
+		Case 2:\n Like Case 1 but with no chip. It calculates a distribution of molecules\n generated at position <z nozzle>, excited at a position <z laser>\n by a laser with spotsize of <Radius Laser>.\n The laser fires at the right time to capture the middle of the molecular cloud.\n Valve diameter, valve opening duration, average vz, and average v width in all three dimensions is taken from configuration file.\n Usage: MolsGen 2 <number of molecules> <z nozzle> <z laser> <Radius Laser>\n\n\
+		Case 3:\n It returns an homogeneous and isotropic distribution in x, y, z, vx, vy, and vz (hypercubical shape) centered at {0,0,0,0,0,vz} (all units in um and us)\n Usage: MolsGen 3 <number of molecules> <x width> <y width> <z width> <vx width> <vy width> <vz width> <vz>\n\n\
 		Case 4:\n A continuous molecular beam is produced from a round nozzle (diameter in cfg file).\n A laser at z=0, propagating along x, excites the molecules (distance laser-nozzle and waist radius (w_0) from cfg file, assuming total excitation efficiency).\n Widths are expressed as FWHM.\n Usage: MolGen 4 <number of molecules> <vx width> <vy width> <vz width> <vz>\n\n");
         return 1;
     }
@@ -36,12 +36,12 @@ int main (int argc, char *argv[]){
         fprintf(stderr, " For Case 1:\n Usage: MolsGen3D 1 <number of molecules> <z nozzle> <z laser> <Radius Laser> <z Chip entrance> \n");
         return 1;
     }
-    if(argc != 10 && gmod==3){
-        fprintf(stderr, " For Case 2:\n Usage: MolsGen 2 <number of molecules> <x width> <y width> <z width> <vx width> <vy width> <vz width> <vz>\n");
+    if(argc != 6 && gmod==2){
+        fprintf(stderr, " For Case 2:\n Usage: MolsGen 2 <number of molecules> <z nozzle> <z laser> <Radius Laser>  \n");
         return 1;
     }
-    if(argc != 6 && gmod==2){
-        fprintf(stderr, " For Case 3:\n Usage: MolsGen 3 <number of molecules> <z nozzle> <z laser> <Radius Laser>  \n");
+    if(argc != 10 && gmod==3){
+        fprintf(stderr, " For Case 3:\n Usage: MolsGen 3 <number of molecules> <x width> <y width> <z width> <vx width> <vy width> <vz width> <vz>\n");
         return 1;
     }
     if(argc != 7 && gmod==4){

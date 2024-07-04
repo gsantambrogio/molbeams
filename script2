@@ -1,13 +1,20 @@
 #!/bin/bash
-for a in `seq 0 100 4000`
+for a in `seq 0 10 100`
 do
-./transcooling $a <test.dat > e3-$a.out
+./transcooling $a <cloud.dat > e3-$a.out
 gnuplot <<- EOF
 set term gif
-set out "test${a}.gif"
-splot [-3000:3000][-3000:3000][0:500000] "e3-$a.out" u 3:4:5 t 't=$a' , "test.dat" u 3:4:5
+set out "vel${a}.gif"
+plot [-0.5:0.5][-0.5:0.5] "e3-$a.out" u 6:7 t 't=$a'
 EOF
-rm e3-$a.out
+gnuplot <<- EOF
+set term gif
+set out "space${a}.gif"
+plot [-1000:1000][-1000:1000] "e3-$a.out" u 3:4 t 't=$a'
+EOF
 done
-convert test?.gif test???.gif test????.gif -delay 50 -loop 0 film.gif
-rm -r test*.gif
+convert vel?.gif vel??.gif vel???.gif -delay 80 -loop 0 Velocity.gif
+rm vel*.gif
+convert space?.gif space??.gif space???.gif -delay 80 -loop 0 Space.gif
+rm space*.gif
+#rm e3-$a.out
